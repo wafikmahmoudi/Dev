@@ -1,0 +1,3842 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Ubuntu Server LTS for x86-64 Containers) 2020.2 (Build 196U)" ts="2021-09-15 13:54:42">
+<Project name="EnsExportProduction_2021-09-15 13-54-26_437+0" LastModified="2021-09-15 13:54:42.59123">
+  <ProjectDescription>Studio Project generated from Production 'FHIRHL7V2DEMOPKG.FoundationProduction' at 2021-09-15 13:54:26.437 UTC</ProjectDescription>
+  <Items>
+    <ProjectItem name="FHIR.Json.XML.UploadToServer" type="CLS"></ProjectItem>
+    <ProjectItem name="FHIRDemo.HL7TransformProcess" type="CLS"></ProjectItem>
+    <ProjectItem name="FHIRDemo.Service.POSTService" type="CLS"></ProjectItem>
+    <ProjectItem name="FHIRHL7V2DEMOPKG.AdicapRouteurRoutingRule" type="CLS"></ProjectItem>
+    <ProjectItem name="FHIRHL7V2DEMOPKG.RecordMapComplexeAdicap" type="CLS"></ProjectItem>
+    <ProjectItem name="FHIRHL7V2DEMOPKG.RecordMapComplexeAdicap.Batch" type="CLS"></ProjectItem>
+    <ProjectItem name="FHIRHL7V2DEMOPKG.RecordMapSegL" type="CLS"></ProjectItem>
+    <ProjectItem name="FHIRHL7V2DEMOPKG.RecordMapSegOBR" type="CLS"></ProjectItem>
+    <ProjectItem name="FHIRHL7V2DEMOPKG.RecordMapSegOBX1" type="CLS"></ProjectItem>
+    <ProjectItem name="FHIRHL7V2DEMOPKG.RecordMapSegP" type="CLS"></ProjectItem>
+    <ProjectItem name="FHIRHL7V2DEMOPKG.RecordMapSegtH" type="CLS"></ProjectItem>
+    <ProjectItem name="HL7.ORU.RouterRoutingRule" type="CLS"></ProjectItem>
+    <ProjectItem name="HL7.ORU.TransformToSDA3" type="CLS"></ProjectItem>
+    <ProjectItem name="JSON.FHIR.GETDATA" type="CLS"></ProjectItem>
+    <ProjectItem name="SDAtoHL7dtl.RoutingEnginetest1" type="CLS"></ProjectItem>
+    <ProjectItem name="User.FTPprod" type="CLS"></ProjectItem>
+    <ProjectItem name="User.Frésénius" type="CLS"></ProjectItem>
+    <ProjectItem name="User.HL7.JsonProcess" type="CLS"></ProjectItem>
+    <ProjectItem name="User.HL7.SDAToFHIR" type="CLS"></ProjectItem>
+    <ProjectItem name="User.HL7.SIUtoSDA" type="CLS"></ProjectItem>
+    <ProjectItem name="User.HL7.ShowJSON" type="CLS"></ProjectItem>
+    <ProjectItem name="User.HL7.TestSIUtoFHIR" type="CLS"></ProjectItem>
+    <ProjectItem name="User.HT7toFHIR" type="CLS"></ProjectItem>
+    <ProjectItem name="User.Identite" type="CLS"></ProjectItem>
+    <ProjectItem name="User.JsonBProcess" type="CLS"></ProjectItem>
+    <ProjectItem name="User.ORUtoFHIR" type="CLS"></ProjectItem>
+    <ProjectItem name="User.SDA3toHL7" type="CLS"></ProjectItem>
+    <ProjectItem name="User.SDA3toHL7Final" type="CLS"></ProjectItem>
+    <ProjectItem name="User.TrasnformHL7toCDAW" type="CLS"></ProjectItem>
+    <ProjectItem name="User.testwafik" type="CLS"></ProjectItem>
+    <ProjectItem name="EnsExportNotes.EnsExportProduction_2021-09-15 13-54-26_437+0.PTD" type="PTD"></ProjectItem>
+  </Items>
+</Project>
+
+
+<Class name="FHIR.Json.XML.UploadToServer">
+<Super>Ens.BusinessService</Super>
+<TimeChanged>65868,50645.852589</TimeChanged>
+<TimeCreated>65834,17478.994343</TimeCreated>
+
+<Parameter name="ADAPTER">
+<Default>EnsLib.File.InboundAdapter</Default>
+</Parameter>
+
+<Property name="endpointURL">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Property name="importTYPE">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Property name="namespace">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Parameter name="SETTINGS">
+<Default>endpointURL,importTYPE,namespace</Default>
+</Parameter>
+
+<Method name="OnProcessInput">
+<FormalSpec>pInput:%FileCharacterStream,pOutput:%RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ try{
+    set tsc=$$$OK
+   //preparing file
+   $$$LOGINFO("Starting processing")
+   set ..namespace = $NAMESPACE
+   set tSource=pInput.Attributes("Filename")
+   set filepath=..Adapter.FilePath
+   $$$LOGINFO("File directory"_filepath)
+   $$$LOGINFO("Current namespace"_$NAMESPACE)
+   
+   set tsc = ##class(HS.FHIRServer.Tools.DataLoader).SubmitResourceFiles(filepath,..importTYPE, ..endpointURL)
+   //$$$LOGSTATUS("logging  : "_tsc)	
+
+   } Catch ex {
+       Set tsc= ex.AsStatus()
+   }
+   Quit tsc
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Class name="FHIRDemo.HL7TransformProcess">
+<Description>
+This is a custom business process that transforms an HL7 message to SDA format (an internal healthcare data format for InterSystems IRIS for Health).
+To use this class, add a business process with this class to the production and configure the target. The default target will send the SDA to a component
+that converts the data to FHIR.
+</Description>
+<ClassType>persistent</ClassType>
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>65525,31707.450447</TimeChanged>
+<TimeCreated>65525,31707.450447</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Default><![CDATA[TargetConfigName:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId},TransformFile:Basic]]></Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>Ens.DataType.ConfigName</Type>
+<InitialExpression>"HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process"</InitialExpression>
+</Property>
+
+<Method name="OnRequest">
+<Description>
+Transforms an HL7 message to SDA, an internal healthcare format for InterSystems IRIS for Health.</Description>
+<FormalSpec>pRequest:EnsLib.HL7.Message,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set tSC = $$$OK
+	try {
+         set tSC = ##class(HS.Gateway.HL7.HL7ToSDA3).GetSDA(pRequest,.tSDA)
+         set tSC = ..SendRequestSync(..TargetConfigName,##class(Ens.StreamContainer).%New(tSDA),.pResponse)
+	} catch ex {
+		set tSC = ex.AsStatus()
+	}
+	quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>HL7TransformProcessDefaultData</DefaultData>
+<Data name="HL7TransformProcessDefaultData">
+<Subscript>"HL7TransformProcess"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="FHIRDemo.Service.POSTService">
+<Super>EnsLib.HL7.Service.Standard</Super>
+<TimeChanged>65525,31707.542381</TimeChanged>
+<TimeCreated>65525,31707.542381</TimeCreated>
+
+<Parameter name="CONTENTTYPE">
+<Default>text/xml</Default>
+</Parameter>
+
+<Parameter name="ADAPTER">
+<Default>EnsLib.HTTP.InboundAdapter</Default>
+</Parameter>
+
+<Property name="TargetConfigNames">
+<Type>%String</Type>
+<InitialExpression>"HL7toSDAProcess"</InitialExpression>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Parameter name="SETTINGS">
+<Default><![CDATA[TargetConfigNames:Basic:selector?multiSelect=1&context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId}]]></Default>
+</Parameter>
+
+<Method name="OnProcessInput">
+<FormalSpec>pDocIn:%RegisteredObject,*pDocOut:%RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set status = $$$OK
+    set request = pDocIn
+
+    set request.DocType=..resolveDocType(pDocIn)
+    
+    try {
+        //$$$ThrowOnError(..SendRequestSync(..#TARGET, request, .pDocOut))
+        for iTarget=1:1:$L(..TargetConfigNames, ",") {
+		    set tOneTarget=$ZStrip($P(..TargetConfigNames,",",iTarget),"<>W")  Continue:""=tOneTarget
+		    set tSC1=..SendRequestSync(tOneTarget,request,.pDocOut)  Set:$$$ISERR(tSC1) tSC=$$$ADDSC(tSC,tSC1)
+	    }
+    } catch ex {
+        set status = ex.AsStatus()
+    }
+    Quit status
+]]></Implementation>
+</Method>
+
+<Method name="OnGetConnections">
+<Description>
+Return an array of connections for drawing lines on the config diagram</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pArray:%String,pItem:Ens.Config.Item</FormalSpec>
+<Implementation><![CDATA[
+	Do ##super(.pArray,pItem)
+	If pItem.GetModifiedSetting("TargetConfigNames",.tValue) {
+		For i=1:1:$L(tValue,",") { Set tOne=$ZStrip($P(tValue,",",i),"<>W")  Continue:""=tOne  Set pArray(tOne)="" }
+	}
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Class name="FHIRHL7V2DEMOPKG.AdicapRouteurRoutingRule">
+<Description>
+</Description>
+<Super>Ens.Rule.Definition</Super>
+<TimeChanged>65891,43285.618413</TimeChanged>
+<TimeCreated>65827,50107.231595</TimeCreated>
+
+<Parameter name="RuleAssistClass">
+<Default>EnsLib.MsgRouter.RuleAssist</Default>
+</Parameter>
+
+<XData name="RuleDefinition">
+<XMLNamespace>http://www.intersystems.com/rule</XMLNamespace>
+<Data><![CDATA[
+<ruleDefinition alias="" context="EnsLib.MsgRouter.RoutingEngine" production="FHIRHL7V2DEMOPKG.FoundationProduction">
+<ruleSet name="" effectiveBegin="" effectiveEnd="">
+<rule name="" disabled="true">
+<constraint name="source" value="InputOru"></constraint>
+<when condition="1">
+<send transform="FHIRHL7V2DEMOPKG.AdicapORUFHIR" target="TestORUtoFHIR"></send>
+<return></return>
+</when>
+</rule>
+<rule name="" disabled="true">
+<constraint name="source" value="InputOru2"></constraint>
+<when condition="1">
+<send transform="FHIRHL7V2DEMOPKG.AdicapORU" target="MessageOru_OUT"></send>
+<return></return>
+</when>
+</rule>
+<rule name="" disabled="false">
+<constraint name="source" value="HprimAdicap"></constraint>
+<when condition="1">
+<send transform="FHIRHL7V2DEMOPKG.hprimToHl7test" target="User.bplORUtoFHIR"></send>
+<return></return>
+</when>
+</rule>
+</ruleSet>
+</ruleDefinition>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="FHIRHL7V2DEMOPKG.RecordMapComplexeAdicap.Batch">
+<Description>
+RECORDMAP: Modified during compilation of Complex RecordMap 'FHIRHL7V2DEMOPKG.RecordMapComplexeAdicap'
+on 2021-05-18 at 15:16:48.663 [2021-05-18 15:16:48.663 UTC]
+by user sjabeur</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>EnsLib.RecordMap.ComplexBatch,Ens.Request</Super>
+<TimeChanged>65882,55008.7148</TimeChanged>
+<TimeCreated>65882,55008.663859</TimeCreated>
+<Inheritance>right</Inheritance>
+
+<Parameter name="RECORDMAPGENERATED">
+<Default>1</Default>
+</Parameter>
+
+<Property name="H">
+<Type>FHIRHL7V2DEMOPKG.RecordMapSegtH.Record</Type>
+<Required>1</Required>
+</Property>
+
+<Property name="p">
+<Type>FHIRHL7V2DEMOPKG.RecordMapSegP.Record</Type>
+</Property>
+
+<Property name="OBR">
+<Type>FHIRHL7V2DEMOPKG.RecordMapSegOBR.Record</Type>
+</Property>
+
+<Property name="OBX">
+<Type>FHIRHL7V2DEMOPKG.RecordMapSegOBX1.Record</Type>
+<Collection>array</Collection>
+</Property>
+
+<Property name="L">
+<Type>FHIRHL7V2DEMOPKG.RecordMapSegL.Record</Type>
+</Property>
+
+<Method name="%OnClose">
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	Set tStatus = $$$OK
+	Try {
+		Set tId = ..%Id()
+		If ""=tId {
+			Set seqKey = ""
+			For {
+				Set tElement = ..OBX.GetNext(.seqKey)
+				If (seqKey = "") Quit
+				If $IsObject(tElement) && (""'=tElement.%Id()) {
+					Set tElementId = tElement.%Id()
+					Set tStatus = ##class(FHIRHL7V2DEMOPKG.RecordMapSegOBX1.Record).%DeleteId(tElementId)
+				}
+				If $$$ISERR(tStatus) Quit
+			}
+		}
+	} Catch ex {
+		Set tStatus = $$$SystemError
+	}
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DataLocation>^FHIRHL7V2DEMOPKG.RecF57B.BatchD</DataLocation>
+<DefaultData>BatchDefaultData</DefaultData>
+<IdLocation>^FHIRHL7V2DEMOPKG.RecF57B.BatchD</IdLocation>
+<IndexLocation>^FHIRHL7V2DEMOPKG.RecF57B.BatchI</IndexLocation>
+<StreamLocation>^FHIRHL7V2DEMOPKG.RecF57B.BatchS</StreamLocation>
+<ExtentSize>2000000</ExtentSize>
+<Data name="BatchDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>H</Value>
+</Value>
+<Value name="3">
+<Value>%Source</Value>
+</Value>
+<Value name="4">
+<Value>OBR</Value>
+</Value>
+<Value name="5">
+<Value>L</Value>
+</Value>
+<Value name="6">
+<Value>p</Value>
+</Value>
+</Data>
+<Data name="OBX">
+<Attribute>OBX</Attribute>
+<Structure>subnode</Structure>
+<Subscript>"OBX"</Subscript>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="FHIRHL7V2DEMOPKG.RecordMapComplexeAdicap">
+<Description>
+</Description>
+<Super>EnsLib.RecordMap.ComplexMap</Super>
+<TimeChanged>65882,55008.680665</TimeChanged>
+<TimeCreated>65881,61091.490101</TimeCreated>
+
+<Parameter name="BATCHCLASS">
+<Default>FHIRHL7V2DEMOPKG.RecordMapComplexeAdicap.Batch</Default>
+</Parameter>
+
+<Method name="PutBatch">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pIOStream:%IO.DeviceStream,pBatch:EnsLib.RecordMap.ComplexBatch</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tStatus = $$$OK
+	Try {
+		If '$IsObject($get(pBatch)) Set tStatus = $$$ERROR($$$ObjectInstanceRequired) Quit
+		If '$IsObject(pIOStream) {
+			Set tFilename = pIOStream
+			Set pIOStream = ##class(%IO.FileStream).%New()
+			Do pIOStream.Open(tFilename,"WAE",,"UTF-8",.tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set tStatus = ##class(FHIRHL7V2DEMOPKG.RecordMapSegtH).PutObject(pIOStream,pBatch.H,0)
+		If $$$ISERR(tStatus) Quit
+		If $IsObject(pBatch.p) {
+			Set tStatus = ##class(FHIRHL7V2DEMOPKG.RecordMapSegP).PutObject(pIOStream,pBatch.p,0)
+			If $$$ISERR(tStatus) Quit
+		}
+		If $IsObject(pBatch.OBR) {
+			Set tStatus = ##class(FHIRHL7V2DEMOPKG.RecordMapSegOBR).PutObject(pIOStream,pBatch.OBR,0)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set seqKey = ""
+		For {
+			Set tElement = pBatch.OBX.GetNext(.seqKey)
+			If (seqKey = "") Quit
+			If $IsObject(tElement) {
+				Set tStatus = ##class(FHIRHL7V2DEMOPKG.RecordMapSegOBX1).PutObject(pIOStream,tElement,0)
+				If $$$ISERR(tStatus) Quit
+			}
+			Set tStatus = pBatch.OBX.%UnSwizzleAt(seqKey)
+			If $$$ISERR(tStatus) Quit
+		}
+		If $$$ISERR(tStatus) Quit
+		If $IsObject(pBatch.L) {
+			Set tStatus = ##class(FHIRHL7V2DEMOPKG.RecordMapSegL).PutObject(pIOStream,pBatch.L,0)
+			If $$$ISERR(tStatus) Quit
+		}
+		Do pIOStream.Flush(.tStatus)
+		If $$$ISERR(tStatus) Quit
+	} Catch ex {
+		Set tStatus = $$$SystemError
+	}
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="GetBatch">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pIOStream:%IO.DeviceStream,pTimeout:%Numeric=-1,*pBatch:EnsLib.RecordMap.ComplexBatch,&pLookAhead:%String=""]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tStatus = $$$OK
+	Try {
+		If '$IsObject(pIOStream) {
+			Set tFilename = pIOStream
+			Set pIOStream = ##class(%IO.FileStream).%New()
+			Do pIOStream.Open(tFilename,,pTimeout,"UTF-8",.tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set pIOStream.CharEncoding = "UTF-8"
+		Set pBatch = ##class(FHIRHL7V2DEMOPKG.RecordMapComplexeAdicap.Batch).%New()
+		Set pBatch.%Source = pIOStream.Name
+		Set pLookAhead = $get(pLookAhead)
+		Set tStatus = ##class(FHIRHL7V2DEMOPKG.RecordMapSegtH).GetObject(pIOStream,.tHeader,pTimeout,.pLookAhead)
+		If $$$ISERR(tStatus) Set tStatus = $system.Status.AppendStatus($$$ERROR($$$EnsRecordMapErrComplexBasic,"H","FHIRHL7V2DEMOPKG.RecordMapSegtH",$classname()),tStatus) Quit
+		Set pBatch.H = tHeader
+		If (2 > $length(pLookAhead)) {
+			Set pLookAhead = pLookAhead _ pIOStream.Read(2-$length(pLookAhead),pTimeout,.tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		If ($extract(pLookAhead,1,2) = "P|") {
+			Set tStatus = ##class(FHIRHL7V2DEMOPKG.RecordMapSegP).GetObject(pIOStream,.tObject,pTimeout,.pLookAhead)
+			If $$$ISERR(tStatus) Set tStatus = $system.Status.AppendStatus($$$ERROR($$$EnsRecordMapErrComplexBasic,"p","FHIRHL7V2DEMOPKG.RecordMapSegP",$classname()),tStatus) Quit
+			Set pBatch.p = tObject
+		}
+		If (4 > $length(pLookAhead)) {
+			Set pLookAhead = pLookAhead _ pIOStream.Read(4-$length(pLookAhead),pTimeout,.tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		If ($extract(pLookAhead,1,4) = "OBR|") {
+			Set tStatus = ##class(FHIRHL7V2DEMOPKG.RecordMapSegOBR).GetObject(pIOStream,.tObject,pTimeout,.pLookAhead)
+			If $$$ISERR(tStatus) Set tStatus = $system.Status.AppendStatus($$$ERROR($$$EnsRecordMapErrComplexBasic,"OBR","FHIRHL7V2DEMOPKG.RecordMapSegOBR",$classname()),tStatus) Quit
+			Set pBatch.OBR = tObject
+		}
+		If (4 > $length(pLookAhead)) {
+			Set pLookAhead = pLookAhead _ pIOStream.Read(4-$length(pLookAhead),pTimeout,.tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set tCount = 0
+		While ($extract(pLookAhead,1,4) = "OBX|") {
+			Set tStatus = ##class(FHIRHL7V2DEMOPKG.RecordMapSegOBX1).GetObject(pIOStream,.tObject,pTimeout,.pLookAhead)
+			Set tCount = tCount + 1
+			If $$$ISERR(tStatus) Quit
+			Set tStatus = tObject.%Save()
+			If $$$ISERR(tStatus) Quit
+			Set tStatus = pBatch.OBX.SetAt(tObject,tCount)
+			If $$$ISERR(tStatus) Quit
+			Set tStatus = pBatch.OBX.%UnSwizzleAt(tCount)
+			If $$$ISERR(tStatus) Quit
+			If (4 > $length(pLookAhead)) {
+				Set pLookAhead = pLookAhead _ pIOStream.Read(4-$length(pLookAhead),pTimeout,.tStatus)
+				If $$$ISERR(tStatus) Quit
+			}
+		}
+		If $$$ISERR(tStatus) Set tStatus = $system.Status.AppendStatus($$$ERROR($$$EnsRecordMapErrComplexRepeating,"OBX","FHIRHL7V2DEMOPKG.RecordMapSegOBX1",$classname(),tCount),tStatus) Quit
+		If (2 > $length(pLookAhead)) {
+			Set pLookAhead = pLookAhead _ pIOStream.Read(2-$length(pLookAhead),pTimeout,.tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		If ($extract(pLookAhead,1,2) = "L|") {
+			Set tStatus = ##class(FHIRHL7V2DEMOPKG.RecordMapSegL).GetObject(pIOStream,.tObject,pTimeout,.pLookAhead)
+			If $$$ISERR(tStatus) Set tStatus = $system.Status.AppendStatus($$$ERROR($$$EnsRecordMapErrComplexBasic,"L","FHIRHL7V2DEMOPKG.RecordMapSegL",$classname()),tStatus) Quit
+			Set pBatch.L = tObject
+		}
+	} Catch {
+		Set tStatus = $$$SystemError
+	}
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Parameter name="RECORDMAPGENERATED">
+<Default>1</Default>
+</Parameter>
+
+<XData name="ComplexBatch">
+<XMLNamespace>http://www.intersystems.com/Ensemble/RecordMap</XMLNamespace>
+<Data><![CDATA[
+<ComplexBatch xmlns="http://www.intersystems.com/Ensemble/RecordMap" name="FHIRHL7V2DEMOPKG.RecordMapComplexeAdicap" char_encoding="UTF-8" targetClassname="FHIRHL7V2DEMOPKG.RecordMapComplexeAdicap.Batch">
+  <Header name="H" recordMap="FHIRHL7V2DEMOPKG.RecordMapSegtH">
+  </Header>
+  <RecordReference name="p" required="0" repeating="0" recordMap="FHIRHL7V2DEMOPKG.RecordMapSegP">
+  </RecordReference>
+  <RecordReference name="OBR" required="0" repeating="0" recordMap="FHIRHL7V2DEMOPKG.RecordMapSegOBR">
+  </RecordReference>
+  <RecordReference name="OBX" required="0" repeating="1" recordMap="FHIRHL7V2DEMOPKG.RecordMapSegOBX1">
+  </RecordReference>
+  <RecordReference name="L" required="0" repeating="0" recordMap="FHIRHL7V2DEMOPKG.RecordMapSegL">
+  </RecordReference>
+</ComplexBatch>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="FHIRHL7V2DEMOPKG.RecordMapSegL">
+<Description>
+RECORDMAP: Modified during compilation of RecordMap 'FHIRHL7V2DEMOPKG.RecordMapSegL'
+on 2021-05-18 at 15:15:42.432 [2021-05-18 15:15:42.433 UTC]
+by user sjabeur</Description>
+<Super>EnsLib.RecordMap.RecordMap</Super>
+<TimeChanged>65882,54942.434457</TimeChanged>
+<TimeCreated>65881,60377.314569</TimeCreated>
+
+<Method name="GetObject">
+<Description>
+Method to retrieve a record from a stream or device. This method will be generated based on the
+structure of the RecordMap. For testing purposes, a file name may be passed in the pStream argument.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,*pObject:%RegisteredObject,pTimeout:%Numeric=-1,&pLookAhead:%String="",pLabelFound:%Boolean=0]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+		Set tStatus = $$$OK
+		Set pObject = $$$NULLOREF
+		If '$IsObject(pStream) {
+			Set tFilename = pStream
+			Set pStream = ##class(%IO.FileStream).%New()
+			Do pStream.Open(tFilename,,pTimeout,"UTF-8", .tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set tObjectName = $parameter($this,"OBJECTNAME")
+		Set tObject = $classmethod(tObjectName,"%New")
+		If '$IsObject(tObject) {
+			Set tStatus = $$$ERROR($$$CannotCreateObject,tObjectName)
+			Quit
+		}
+		Set tObject.%Source = pStream.Name
+		Set tGetTopFields = $parameter(tObject,"INCLUDETOPFIELDS")
+		If pStream.AtEnd && (""=pLookAhead) {
+			Set tStatus = $$$ERROR($$$EnsRecordMapErrStreamAtEnd, pStream.Name)
+			Quit
+		}
+		Set pStream.CharEncoding = "UTF-8"
+
+		#; Parse incoming stream
+		Set tStatus = ..GetRecord(pStream, tObject, tGetTopFields, pTimeout, .pLookAhead, pLabelFound)
+		If $$$ISERR(tStatus) Quit
+	}
+	Catch ex {
+		Set tStatus = ex.AsStatus()
+	}
+	If $$$ISERR(tStatus) { Set pObject = $$$NULLOREF }
+	Else { Set pObject = tObject }
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="PutObject">
+<Description>
+Method to write a record to a stream or device. This method will be generated based on the
+structure of the RecordMap. For testing purposes, a file name may be passed in the pStream argument.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pFlush:%Boolean=1,&pPadArray:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+		Set tStatus = $$$OK
+		If '$IsObject(pStream) {
+			Set tFilename = pStream
+			Set pStream = ##class(%IO.FileStream).%New()
+			Do pStream.Open(tFilename,"WAE",,"UTF-8", .tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set tHasTopFields = $parameter(pObject,"INCLUDETOPFIELDS")
+		Set pStream.CharEncoding = "UTF-8"
+
+		Set tStatus = ..PutRecord(pStream, pObject, tHasTopFields, .pPadArray)
+		If $$$ISERR(tStatus) Quit
+		If pFlush Do pStream.Flush(.tStatus)
+		If $$$ISERR(tStatus) Quit
+	}
+	Catch ex {
+		Set tStatus = ex.AsStatus()
+	}
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Parameter name="OBJECTNAME">
+<Default>FHIRHL7V2DEMOPKG.RecordMapSegL.Record</Default>
+</Parameter>
+
+<Method name="GetRecord">
+<Description>
+Internal helper method to perform parse of incoming data</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pGetTopFields:%Boolean,pTimeout:%Numeric,&pLookAhead:%String="",pLabelFound:%Boolean=0]]></FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tStatus = $$$OK
+	If pLabelFound { Set tRecLabel = "" } 
+	Else { Set tRecLabel = "L|" } 
+	Set tStatus = ..chunkRecord(pStream, .tRecordData, .tCharCount, "", pTimeout, $char(13,10), tRecLabel, .pLookAhead, "")
+	If $$$ISERR(tStatus) Quit tStatus
+	Set tMaxLocal = $$$MaxLocalLength
+	Set tRecordData("charcount") = +$get(tCharCount)
+	Set tCurrChunk = 1
+	Set tTopPiece = 1
+	Set tCurrSep = 1
+	Set tStrings = 1
+	Set tCurrString = ""
+	Set tSeps = $listbuild($char(124),$char(94),$char(126))
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Else {
+		Set tCurrString = tRecordData(tCurrChunk)
+		Set tCurrPiece = 1
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NewField1 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NewField2 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NewField3 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NewField4 = tCurrString
+	}
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="PutRecord">
+<Description>
+Internal helper method to output object to a stream</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pHasTopFields:%Boolean,&pPadArray:%String]]></FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tStatus = $$$OK
+	Do pStream.Write("L|",,.tStatus)
+	If $$$ISERR(tStatus) Quit tStatus
+	Do pStream.Write($select(pHasTopFields: pObject.NewField1,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NewField2,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NewField3,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NewField4,1: ""),0)
+	Do pStream.Write($char(13,10), 0, .tStatus)
+	If $$$ISERR(tStatus) Quit tStatus
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="GetGeneratedClasses">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pClasses:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Kill pClasses
+	Set pClasses("FHIRHL7V2DEMOPKG.RecordMapSegL.Record")=""
+	Set pClasses($classname())=""
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="getIdentifier">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec/>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA["L|"
+]]></Implementation>
+</Method>
+
+<Method name="getType">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec/>
+<ReturnType>EnsLib.RecordMap.Model.DataType.RecordType</ReturnType>
+<Implementation><![CDATA["delimited"
+]]></Implementation>
+</Method>
+
+<XData name="RecordMap">
+<XMLNamespace>http://www.intersystems.com/Ensemble/RecordMap</XMLNamespace>
+<Data><![CDATA[
+<Record xmlns="http://www.intersystems.com/Ensemble/RecordMap" name="FHIRHL7V2DEMOPKG.RecordMapSegL" type="delimited" char_encoding="UTF-8" targetClassname="FHIRHL7V2DEMOPKG.RecordMapSegL.Record" complexBatchManaged="1" label="L|" padFromLeft="0" recordTerminator="\x0d\x0a" allowEarlyTerminator="0">
+  <Separators>
+    <Separator>|</Separator>
+    <Separator>^</Separator>
+    <Separator>~</Separator>
+  </Separators>
+  <Field name="NewField1" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="NewField2" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="NewField3" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="NewField4" required="0" ignored="0" datatype="%String">
+  </Field>
+</Record>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="FHIRHL7V2DEMOPKG.RecordMapSegOBR">
+<Description>
+RECORDMAP: Modified during compilation of RecordMap 'FHIRHL7V2DEMOPKG.RecordMapSegOBR'
+on 2021-05-18 at 15:15:05.005 [2021-05-18 15:15:05.005 UTC]
+by user sjabeur</Description>
+<Super>EnsLib.RecordMap.RecordMap</Super>
+<TimeChanged>65882,54905.007781</TimeChanged>
+<TimeCreated>65881,59054.802577</TimeCreated>
+
+<Method name="GetObject">
+<Description>
+Method to retrieve a record from a stream or device. This method will be generated based on the
+structure of the RecordMap. For testing purposes, a file name may be passed in the pStream argument.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,*pObject:%RegisteredObject,pTimeout:%Numeric=-1,&pLookAhead:%String="",pLabelFound:%Boolean=0]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+		Set tStatus = $$$OK
+		Set pObject = $$$NULLOREF
+		If '$IsObject(pStream) {
+			Set tFilename = pStream
+			Set pStream = ##class(%IO.FileStream).%New()
+			Do pStream.Open(tFilename,,pTimeout,"UTF-8", .tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set tObjectName = $parameter($this,"OBJECTNAME")
+		Set tObject = $classmethod(tObjectName,"%New")
+		If '$IsObject(tObject) {
+			Set tStatus = $$$ERROR($$$CannotCreateObject,tObjectName)
+			Quit
+		}
+		Set tObject.%Source = pStream.Name
+		Set tGetTopFields = $parameter(tObject,"INCLUDETOPFIELDS")
+		If pStream.AtEnd && (""=pLookAhead) {
+			Set tStatus = $$$ERROR($$$EnsRecordMapErrStreamAtEnd, pStream.Name)
+			Quit
+		}
+		Set pStream.CharEncoding = "UTF-8"
+
+		#; Parse incoming stream
+		Set tStatus = ..GetRecord(pStream, tObject, tGetTopFields, pTimeout, .pLookAhead, pLabelFound)
+		If $$$ISERR(tStatus) Quit
+	}
+	Catch ex {
+		Set tStatus = ex.AsStatus()
+	}
+	If $$$ISERR(tStatus) { Set pObject = $$$NULLOREF }
+	Else { Set pObject = tObject }
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="PutObject">
+<Description>
+Method to write a record to a stream or device. This method will be generated based on the
+structure of the RecordMap. For testing purposes, a file name may be passed in the pStream argument.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pFlush:%Boolean=1,&pPadArray:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+		Set tStatus = $$$OK
+		If '$IsObject(pStream) {
+			Set tFilename = pStream
+			Set pStream = ##class(%IO.FileStream).%New()
+			Do pStream.Open(tFilename,"WAE",,"UTF-8", .tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set tHasTopFields = $parameter(pObject,"INCLUDETOPFIELDS")
+		Set pStream.CharEncoding = "UTF-8"
+
+		Set tStatus = ..PutRecord(pStream, pObject, tHasTopFields, .pPadArray)
+		If $$$ISERR(tStatus) Quit
+		If pFlush Do pStream.Flush(.tStatus)
+		If $$$ISERR(tStatus) Quit
+	}
+	Catch ex {
+		Set tStatus = ex.AsStatus()
+	}
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Parameter name="OBJECTNAME">
+<Default>FHIRHL7V2DEMOPKG.RecordMapSegOBR.Record</Default>
+</Parameter>
+
+<Method name="GetRecord">
+<Description>
+Internal helper method to perform parse of incoming data</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pGetTopFields:%Boolean,pTimeout:%Numeric,&pLookAhead:%String="",pLabelFound:%Boolean=0]]></FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tStatus = $$$OK
+	If pLabelFound { Set tRecLabel = "" } 
+	Else { Set tRecLabel = "OBR|" } 
+	Set tStatus = ..chunkRecord(pStream, .tRecordData, .tCharCount, "", pTimeout, $char(13,10), tRecLabel, .pLookAhead, "")
+	If $$$ISERR(tStatus) Quit tStatus
+	Set tMaxLocal = $$$MaxLocalLength
+	Set tRecordData("charcount") = +$get(tCharCount)
+	Set tCurrChunk = 1
+	Set tTopPiece = 1
+	Set tCurrSep = 1
+	Set tStrings = 1
+	Set tCurrString = ""
+	Set tSeps = $listbuild($char(124),$char(94),$char(126))
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Else {
+		Set tCurrString = tRecordData(tCurrChunk)
+		Set tCurrPiece = 1
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.Rang = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ3 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	Set tStrings(tStrings) = tCurrString
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 1)
+	Set tStrings = tStrings + 1
+	Set pObject.Idechantillon.IdResult = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 2)
+	Set tStrings = tStrings + 1
+	If pGetTopFields {
+		Set pObject.IdDemande = tStrings(tStrings)
+	}
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	Set tStrings(tStrings) = tCurrString
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 1)
+	Set tStrings = tStrings + 1
+	Set pObject.AnalysreOrActe.CodeExam = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 2)
+	Set tStrings = tStrings + 1
+	Set pObject.AnalysreOrActe.LibelleExam = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ6 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.DatePriseCompe = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.DateActe = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ9 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ10 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ11 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ12 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ13 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ14 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.DateReceptionEchantillon = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ16 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	Set tStrings(tStrings) = tCurrString
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 1)
+	Set tStrings = tStrings + 1
+	Set pObject.Prescripteur.CodePrescripteur = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 2)
+	Set tStrings = tStrings + 1
+	Set pObject.Prescripteur.NomPrescripteur = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 3)
+	Set tStrings = tStrings + 1
+	Set pObject.Prescripteur.SouChamp3 = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 4)
+	Set tStrings = tStrings + 1
+	If pGetTopFields {
+		Set pObject.servicedestinataire1 = tStrings(tStrings)
+	}
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 5)
+	Set tStrings = tStrings + 1
+	If pGetTopFields {
+		Set pObject.servicedestinataire2 = tStrings(tStrings)
+	}
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 6)
+	Set tStrings = tStrings + 1
+	If pGetTopFields {
+		Set pObject.servicedestinataire3 = tStrings(tStrings)
+	}
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ18 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ19 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ20 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ21 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ22 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.DateResult = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ24 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.ServiceExecutant = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.StatutActe = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ27 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ28 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ29 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ30 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ31 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ32 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ33 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ34 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ35 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	Set tStrings(tStrings) = tCurrString
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 1)
+	Set tStrings = tStrings + 1
+	Set pObject.OperateurSaisie.Code = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 2)
+	Set tStrings = tStrings + 1
+	Set pObject.OperateurSaisie.Nom = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="PutRecord">
+<Description>
+Internal helper method to output object to a stream</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pHasTopFields:%Boolean,&pPadArray:%String]]></FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tStatus = $$$OK
+	Do pStream.Write("OBR|",,.tStatus)
+	If $$$ISERR(tStatus) Quit tStatus
+	Do pStream.Write($select(pHasTopFields: pObject.Rang,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ3,1: ""),0)
+	Do pStream.Write($char(124),0)
+	Do pStream.Write(pObject.Idechantillon.IdResult,0)
+	Do pStream.Write($char(94) _ $select(pHasTopFields: pObject.IdDemande,1: ""),0)
+	Do pStream.Write($char(124),0)
+	Do pStream.Write(pObject.AnalysreOrActe.CodeExam,0)
+	Do pStream.Write($char(94) _ pObject.AnalysreOrActe.LibelleExam,0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ6,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.DatePriseCompe,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.DateActe,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ9,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ10,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ11,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ12,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ13,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ14,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.DateReceptionEchantillon,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ16,1: ""),0)
+	Do pStream.Write($char(124),0)
+	Do pStream.Write(pObject.Prescripteur.CodePrescripteur,0)
+	Do pStream.Write($char(94) _ pObject.Prescripteur.NomPrescripteur,0)
+	Do pStream.Write($char(94) _ pObject.Prescripteur.SouChamp3,0)
+	Do pStream.Write($char(94) _ $select(pHasTopFields: pObject.servicedestinataire1,1: ""),0)
+	Do pStream.Write($char(94) _ $select(pHasTopFields: pObject.servicedestinataire2,1: ""),0)
+	Do pStream.Write($char(94) _ $select(pHasTopFields: pObject.servicedestinataire3,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ18,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ19,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ20,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ21,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ22,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.DateResult,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ24,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.ServiceExecutant,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.StatutActe,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ27,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ28,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ29,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ30,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ31,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ32,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ33,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ34,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ35,1: ""),0)
+	Do pStream.Write($char(124),0)
+	Do pStream.Write(pObject.OperateurSaisie.Code,0)
+	Do pStream.Write($char(94) _ pObject.OperateurSaisie.Nom,0)
+	Do pStream.Write($char(13,10), 0, .tStatus)
+	If $$$ISERR(tStatus) Quit tStatus
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="GetGeneratedClasses">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pClasses:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Kill pClasses
+	Set pClasses("FHIRHL7V2DEMOPKG.RecordMapSegOBR.Record")=""
+	Set pClasses("FHIRHL7V2DEMOPKG.RecordMapSegOBR.Record.AnalysreOrActe")=""
+	Set pClasses("FHIRHL7V2DEMOPKG.RecordMapSegOBR.Record.Idechantillon")=""
+	Set pClasses("FHIRHL7V2DEMOPKG.RecordMapSegOBR.Record.OperateurSaisie")=""
+	Set pClasses("FHIRHL7V2DEMOPKG.RecordMapSegOBR.Record.Prescripteur")=""
+	Set pClasses($classname())=""
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="getIdentifier">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec/>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA["OBR|"
+]]></Implementation>
+</Method>
+
+<Method name="getType">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec/>
+<ReturnType>EnsLib.RecordMap.Model.DataType.RecordType</ReturnType>
+<Implementation><![CDATA["delimited"
+]]></Implementation>
+</Method>
+
+<XData name="RecordMap">
+<XMLNamespace>http://www.intersystems.com/Ensemble/RecordMap</XMLNamespace>
+<Data><![CDATA[
+<Record xmlns="http://www.intersystems.com/Ensemble/RecordMap" name="FHIRHL7V2DEMOPKG.RecordMapSegOBR" type="delimited" char_encoding="UTF-8" targetClassname="FHIRHL7V2DEMOPKG.RecordMapSegOBR.Record" complexBatchManaged="1" label="OBR|" padFromLeft="0" recordTerminator="\x0d\x0a" allowEarlyTerminator="0">
+  <Separators>
+    <Separator>|</Separator>
+    <Separator>^</Separator>
+    <Separator>~</Separator>
+  </Separators>
+  <Field name="Rang" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ3" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Composite name="Idechantillon" required="0" ignored="0">
+    <Field name="Idechantillon.IdResult" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+    <Field name="IdDemande" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+  </Composite>
+  <Composite name="AnalysreOrActe" required="0" ignored="0">
+    <Field name="AnalysreOrActe.CodeExam" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+    <Field name="AnalysreOrActe.LibelleExam" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+  </Composite>
+  <Field name="champ6" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="DatePriseCompe" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="DateActe" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ9" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ10" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ11" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ12" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ13" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ14" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="DateReceptionEchantillon" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ16" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Composite name="Prescripteur" required="0" ignored="0">
+    <Field name="Prescripteur.CodePrescripteur" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+    <Field name="Prescripteur.NomPrescripteur" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+    <Field name="Prescripteur.SouChamp3" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+    <Field name="servicedestinataire1" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+    <Field name="servicedestinataire2" required="0" ignored="0" datatype="%String">
+    </Field>
+    <Field name="servicedestinataire3" required="0" ignored="0" datatype="%String">
+    </Field>
+  </Composite>
+  <Field name="champ18" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ19" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ20" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="champ21" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="champ22" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="DateResult" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ24" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="ServiceExecutant" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="StatutActe" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ27" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ28" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="champ29" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="champ30" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="champ31" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="champ32" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="champ33" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="champ34" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="champ35" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Composite name="OperateurSaisie" required="0" ignored="0">
+    <Field name="OperateurSaisie.Code" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+    <Field name="OperateurSaisie.Nom" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+  </Composite>
+</Record>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="FHIRHL7V2DEMOPKG.RecordMapSegOBX1">
+<Description>
+RECORDMAP: Modified during compilation of RecordMap 'FHIRHL7V2DEMOPKG.RecordMapSegOBX1'
+on 2021-05-18 at 15:20:56.304 [2021-05-18 15:20:56.304 UTC]
+by user sjabeur</Description>
+<Super>EnsLib.RecordMap.RecordMap</Super>
+<TimeChanged>65882,55256.306144</TimeChanged>
+<TimeCreated>65881,59690.515697</TimeCreated>
+
+<Method name="GetObject">
+<Description>
+Method to retrieve a record from a stream or device. This method will be generated based on the
+structure of the RecordMap. For testing purposes, a file name may be passed in the pStream argument.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,*pObject:%RegisteredObject,pTimeout:%Numeric=-1,&pLookAhead:%String="",pLabelFound:%Boolean=0]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+		Set tStatus = $$$OK
+		Set pObject = $$$NULLOREF
+		If '$IsObject(pStream) {
+			Set tFilename = pStream
+			Set pStream = ##class(%IO.FileStream).%New()
+			Do pStream.Open(tFilename,,pTimeout,"UTF-8", .tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set tObjectName = $parameter($this,"OBJECTNAME")
+		Set tObject = $classmethod(tObjectName,"%New")
+		If '$IsObject(tObject) {
+			Set tStatus = $$$ERROR($$$CannotCreateObject,tObjectName)
+			Quit
+		}
+		Set tObject.%Source = pStream.Name
+		Set tGetTopFields = $parameter(tObject,"INCLUDETOPFIELDS")
+		If pStream.AtEnd && (""=pLookAhead) {
+			Set tStatus = $$$ERROR($$$EnsRecordMapErrStreamAtEnd, pStream.Name)
+			Quit
+		}
+		Set pStream.CharEncoding = "UTF-8"
+
+		#; Parse incoming stream
+		Set tStatus = ..GetRecord(pStream, tObject, tGetTopFields, pTimeout, .pLookAhead, pLabelFound)
+		If $$$ISERR(tStatus) Quit
+	}
+	Catch ex {
+		Set tStatus = ex.AsStatus()
+	}
+	If $$$ISERR(tStatus) { Set pObject = $$$NULLOREF }
+	Else { Set pObject = tObject }
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="PutObject">
+<Description>
+Method to write a record to a stream or device. This method will be generated based on the
+structure of the RecordMap. For testing purposes, a file name may be passed in the pStream argument.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pFlush:%Boolean=1,&pPadArray:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+		Set tStatus = $$$OK
+		If '$IsObject(pStream) {
+			Set tFilename = pStream
+			Set pStream = ##class(%IO.FileStream).%New()
+			Do pStream.Open(tFilename,"WAE",,"UTF-8", .tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set tHasTopFields = $parameter(pObject,"INCLUDETOPFIELDS")
+		Set pStream.CharEncoding = "UTF-8"
+
+		Set tStatus = ..PutRecord(pStream, pObject, tHasTopFields, .pPadArray)
+		If $$$ISERR(tStatus) Quit
+		If pFlush Do pStream.Flush(.tStatus)
+		If $$$ISERR(tStatus) Quit
+	}
+	Catch ex {
+		Set tStatus = ex.AsStatus()
+	}
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Parameter name="OBJECTNAME">
+<Default>FHIRHL7V2DEMOPKG.RecordMapSegOBX1.Record</Default>
+</Parameter>
+
+<Method name="GetRecord">
+<Description>
+Internal helper method to perform parse of incoming data</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pGetTopFields:%Boolean,pTimeout:%Numeric,&pLookAhead:%String="",pLabelFound:%Boolean=0]]></FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tStatus = $$$OK
+	If pLabelFound { Set tRecLabel = "" } 
+	Else { Set tRecLabel = "OBX|" } 
+	Set tStatus = ..chunkRecord(pStream, .tRecordData, .tCharCount, "", pTimeout, $char(13,10), tRecLabel, .pLookAhead, "")
+	If $$$ISERR(tStatus) Quit tStatus
+	Set tMaxLocal = $$$MaxLocalLength
+	Set tRecordData("charcount") = +$get(tCharCount)
+	Set tCurrChunk = 1
+	Set tTopPiece = 1
+	Set tCurrSep = 1
+	Set tStrings = 1
+	Set tCurrString = ""
+	Set tSeps = $listbuild($char(124),$char(94))
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Else {
+		Set tCurrString = tRecordData(tCurrChunk)
+		Set tCurrPiece = 1
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.Rang = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.TypeResult = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	Set tStrings(tStrings) = tCurrString
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 1)
+	Set tStrings = tStrings + 1
+	Set pObject.test.Code = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 2)
+	Set tStrings = tStrings + 1
+	Set pObject.test.Libelle = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.Champ5 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.Resultat = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ7 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ8 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ9 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ10 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ11 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.SatutResult = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ13 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ14 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.dateObservation = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ16 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	Set tStrings(tStrings) = tCurrString
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 1)
+	Set tStrings = tStrings + 1
+	Set pObject.Valideur.Code = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 2)
+	Set tStrings = tStrings + 1
+	Set pObject.Valideur.Nom = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="PutRecord">
+<Description>
+Internal helper method to output object to a stream</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pHasTopFields:%Boolean,&pPadArray:%String]]></FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tStatus = $$$OK
+	Do pStream.Write("OBX|",,.tStatus)
+	If $$$ISERR(tStatus) Quit tStatus
+	Do pStream.Write($select(pHasTopFields: pObject.Rang,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.TypeResult,1: ""),0)
+	Do pStream.Write($char(124),0)
+	Do pStream.Write(pObject.test.Code,0)
+	Do pStream.Write($char(94) _ pObject.test.Libelle,0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.Champ5,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.Resultat,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ7,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ8,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ9,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ10,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ11,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.SatutResult,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ13,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ14,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.dateObservation,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ16,1: ""),0)
+	Do pStream.Write($char(124),0)
+	Do pStream.Write(pObject.Valideur.Code,0)
+	Do pStream.Write($char(94) _ pObject.Valideur.Nom,0)
+	Do pStream.Write($char(13,10), 0, .tStatus)
+	If $$$ISERR(tStatus) Quit tStatus
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="GetGeneratedClasses">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pClasses:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Kill pClasses
+	Set pClasses("FHIRHL7V2DEMOPKG.RecordMapSegOBX1.Record")=""
+	Set pClasses("FHIRHL7V2DEMOPKG.RecordMapSegOBX1.Record.Valideur")=""
+	Set pClasses("FHIRHL7V2DEMOPKG.RecordMapSegOBX1.Record.test")=""
+	Set pClasses($classname())=""
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="getIdentifier">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec/>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA["OBX|"
+]]></Implementation>
+</Method>
+
+<Method name="getType">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec/>
+<ReturnType>EnsLib.RecordMap.Model.DataType.RecordType</ReturnType>
+<Implementation><![CDATA["delimited"
+]]></Implementation>
+</Method>
+
+<XData name="RecordMap">
+<XMLNamespace>http://www.intersystems.com/Ensemble/RecordMap</XMLNamespace>
+<Data><![CDATA[
+<Record xmlns="http://www.intersystems.com/Ensemble/RecordMap" name="FHIRHL7V2DEMOPKG.RecordMapSegOBX1" type="delimited" char_encoding="UTF-8" targetClassname="FHIRHL7V2DEMOPKG.RecordMapSegOBX1.Record" complexBatchManaged="1" label="OBX|" padFromLeft="0" recordTerminator="\x0d\x0a" allowEarlyTerminator="0">
+  <Separators>
+    <Separator>|</Separator>
+    <Separator>^</Separator>
+  </Separators>
+  <Field name="Rang" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="TypeResult" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Composite name="test" required="0" ignored="0">
+    <Field name="test.Code" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+    <Field name="test.Libelle" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+  </Composite>
+  <Field name="Champ5" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="Resultat" required="0" ignored="0" datatype="%String" params="MAXLEN = &quot;&quot;" repeating="0">
+  </Field>
+  <Field name="champ7" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ8" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ9" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ10" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ11" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="SatutResult" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ13" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ14" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="dateObservation" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ16" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Composite name="Valideur" required="0" ignored="0">
+    <Field name="Valideur.Code" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+    <Field name="Valideur.Nom" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+  </Composite>
+</Record>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="FHIRHL7V2DEMOPKG.RecordMapSegP">
+<Description>
+RECORDMAP: Modified during compilation of RecordMap 'FHIRHL7V2DEMOPKG.RecordMapSegP'
+on 2021-05-18 at 15:16:04.321 [2021-05-18 15:16:04.321 UTC]
+by user sjabeur</Description>
+<Super>EnsLib.RecordMap.RecordMap</Super>
+<TimeChanged>65882,54964.32279</TimeChanged>
+<TimeCreated>65881,57713.84492</TimeCreated>
+
+<Method name="GetObject">
+<Description>
+Method to retrieve a record from a stream or device. This method will be generated based on the
+structure of the RecordMap. For testing purposes, a file name may be passed in the pStream argument.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,*pObject:%RegisteredObject,pTimeout:%Numeric=-1,&pLookAhead:%String="",pLabelFound:%Boolean=0]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+		Set tStatus = $$$OK
+		Set pObject = $$$NULLOREF
+		If '$IsObject(pStream) {
+			Set tFilename = pStream
+			Set pStream = ##class(%IO.FileStream).%New()
+			Do pStream.Open(tFilename,,pTimeout,"UTF-8", .tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set tObjectName = $parameter($this,"OBJECTNAME")
+		Set tObject = $classmethod(tObjectName,"%New")
+		If '$IsObject(tObject) {
+			Set tStatus = $$$ERROR($$$CannotCreateObject,tObjectName)
+			Quit
+		}
+		Set tObject.%Source = pStream.Name
+		Set tGetTopFields = $parameter(tObject,"INCLUDETOPFIELDS")
+		If pStream.AtEnd && (""=pLookAhead) {
+			Set tStatus = $$$ERROR($$$EnsRecordMapErrStreamAtEnd, pStream.Name)
+			Quit
+		}
+		Set pStream.CharEncoding = "UTF-8"
+
+		#; Parse incoming stream
+		Set tStatus = ..GetRecord(pStream, tObject, tGetTopFields, pTimeout, .pLookAhead, pLabelFound)
+		If $$$ISERR(tStatus) Quit
+	}
+	Catch ex {
+		Set tStatus = ex.AsStatus()
+	}
+	If $$$ISERR(tStatus) { Set pObject = $$$NULLOREF }
+	Else { Set pObject = tObject }
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="PutObject">
+<Description>
+Method to write a record to a stream or device. This method will be generated based on the
+structure of the RecordMap. For testing purposes, a file name may be passed in the pStream argument.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pFlush:%Boolean=1,&pPadArray:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+		Set tStatus = $$$OK
+		If '$IsObject(pStream) {
+			Set tFilename = pStream
+			Set pStream = ##class(%IO.FileStream).%New()
+			Do pStream.Open(tFilename,"WAE",,"UTF-8", .tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set tHasTopFields = $parameter(pObject,"INCLUDETOPFIELDS")
+		Set pStream.CharEncoding = "UTF-8"
+
+		Set tStatus = ..PutRecord(pStream, pObject, tHasTopFields, .pPadArray)
+		If $$$ISERR(tStatus) Quit
+		If pFlush Do pStream.Flush(.tStatus)
+		If $$$ISERR(tStatus) Quit
+	}
+	Catch ex {
+		Set tStatus = ex.AsStatus()
+	}
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Parameter name="OBJECTNAME">
+<Default>FHIRHL7V2DEMOPKG.RecordMapSegP.Record</Default>
+</Parameter>
+
+<Method name="GetRecord">
+<Description>
+Internal helper method to perform parse of incoming data</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pGetTopFields:%Boolean,pTimeout:%Numeric,&pLookAhead:%String="",pLabelFound:%Boolean=0]]></FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tStatus = $$$OK
+	If pLabelFound { Set tRecLabel = "" } 
+	Else { Set tRecLabel = "P|" } 
+	Set tStatus = ..chunkRecord(pStream, .tRecordData, .tCharCount, "", pTimeout, $char(13,10), tRecLabel, .pLookAhead, "")
+	If $$$ISERR(tStatus) Quit tStatus
+	Set tMaxLocal = $$$MaxLocalLength
+	Set tRecordData("charcount") = +$get(tCharCount)
+	Set tCurrChunk = 1
+	Set tTopPiece = 1
+	Set tCurrSep = 1
+	Set tStrings = 1
+	Set tCurrString = ""
+	Set tSeps = $listbuild($char(124),$char(94),$char(126))
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Else {
+		Set tCurrString = tRecordData(tCurrChunk)
+		Set tCurrPiece = 1
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.Rang = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.IdPatient = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ4 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NDApatient = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	Set tStrings(tStrings) = tCurrString
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 1)
+	Set tStrings = tStrings + 1
+	Set pObject.NomPatient.Nom = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 2)
+	Set tStrings = tStrings + 1
+	Set pObject.NomPatient.Prenom1 = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 3)
+	Set tStrings = tStrings + 1
+	Set pObject.NomPatient.Schamp3 = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 4)
+	Set tStrings = tStrings + 1
+	Set pObject.NomPatient.Schamp4 = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 5)
+	Set tStrings = tStrings + 1
+	Set pObject.NomPatient.Civilite = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NomJeuneFille = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.DateNaissance = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.Sexe = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ10 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ11 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ12 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ13 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ14 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ15 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ16 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ17 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ18 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ19 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ20 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ21 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ22 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ23 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.DateVenu = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NewField1 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NewField2 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NewField3 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NewField4 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NewField5 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NewField6 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NewField7 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NewField8 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NewField9 = tCurrString
+	}
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="PutRecord">
+<Description>
+Internal helper method to output object to a stream</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pHasTopFields:%Boolean,&pPadArray:%String]]></FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tStatus = $$$OK
+	Do pStream.Write("P|",,.tStatus)
+	If $$$ISERR(tStatus) Quit tStatus
+	Do pStream.Write($select(pHasTopFields: pObject.Rang,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.IdPatient,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ4,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NDApatient,1: ""),0)
+	Do pStream.Write($char(124),0)
+	Do pStream.Write(pObject.NomPatient.Nom,0)
+	Do pStream.Write($char(94) _ pObject.NomPatient.Prenom1,0)
+	Do pStream.Write($char(94) _ pObject.NomPatient.Schamp3,0)
+	Do pStream.Write($char(94) _ pObject.NomPatient.Schamp4,0)
+	Do pStream.Write($char(94) _ pObject.NomPatient.Civilite,0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NomJeuneFille,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.DateNaissance,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.Sexe,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ10,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ11,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ12,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ13,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ14,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ15,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ16,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ17,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ18,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ19,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ20,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ21,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ22,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ23,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.DateVenu,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NewField1,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NewField2,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NewField3,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NewField4,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NewField5,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NewField6,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NewField7,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NewField8,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NewField9,1: ""),0)
+	Do pStream.Write($char(13,10), 0, .tStatus)
+	If $$$ISERR(tStatus) Quit tStatus
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="GetGeneratedClasses">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pClasses:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Kill pClasses
+	Set pClasses("FHIRHL7V2DEMOPKG.RecordMapSegP.Record")=""
+	Set pClasses("FHIRHL7V2DEMOPKG.RecordMapSegP.Record.NomPatient")=""
+	Set pClasses($classname())=""
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="getIdentifier">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec/>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA["P|"
+]]></Implementation>
+</Method>
+
+<Method name="getType">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec/>
+<ReturnType>EnsLib.RecordMap.Model.DataType.RecordType</ReturnType>
+<Implementation><![CDATA["delimited"
+]]></Implementation>
+</Method>
+
+<XData name="RecordMap">
+<XMLNamespace>http://www.intersystems.com/Ensemble/RecordMap</XMLNamespace>
+<Data><![CDATA[
+<Record xmlns="http://www.intersystems.com/Ensemble/RecordMap" name="FHIRHL7V2DEMOPKG.RecordMapSegP" type="delimited" char_encoding="UTF-8" targetClassname="FHIRHL7V2DEMOPKG.RecordMapSegP.Record" complexBatchManaged="1" label="P|" padFromLeft="0" recordTerminator="\x0d\x0a" allowEarlyTerminator="0">
+  <Separators>
+    <Separator>|</Separator>
+    <Separator>^</Separator>
+    <Separator>~</Separator>
+  </Separators>
+  <Field name="Rang" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="IdPatient" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ4" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="NDApatient" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Composite name="NomPatient" required="0" ignored="0">
+    <Field name="NomPatient.Nom" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+    <Field name="NomPatient.Prenom1" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+    <Field name="NomPatient.Schamp3" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+    <Field name="NomPatient.Schamp4" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+    <Field name="NomPatient.Civilite" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+  </Composite>
+  <Field name="NomJeuneFille" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="DateNaissance" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="Sexe" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ10" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ11" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ12" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ13" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ14" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ15" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ16" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ17" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ18" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ19" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ20" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ21" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ22" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ23" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="DateVenu" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="NewField1" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="NewField2" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="NewField3" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="NewField4" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="NewField5" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="NewField6" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="NewField7" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="NewField8" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="NewField9" required="0" ignored="0" datatype="%String">
+  </Field>
+</Record>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="FHIRHL7V2DEMOPKG.RecordMapSegtH">
+<Description>
+RECORDMAP: Modified during compilation of RecordMap 'FHIRHL7V2DEMOPKG.RecordMapSegtH'
+on 2021-05-18 at 15:16:17.062 [2021-05-18 15:16:17.062 UTC]
+by user sjabeur</Description>
+<Super>EnsLib.RecordMap.RecordMap</Super>
+<TimeChanged>65882,54977.063789</TimeChanged>
+<TimeCreated>65881,56961.547029</TimeCreated>
+
+<Method name="GetObject">
+<Description>
+Method to retrieve a record from a stream or device. This method will be generated based on the
+structure of the RecordMap. For testing purposes, a file name may be passed in the pStream argument.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,*pObject:%RegisteredObject,pTimeout:%Numeric=-1,&pLookAhead:%String="",pLabelFound:%Boolean=0]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+		Set tStatus = $$$OK
+		Set pObject = $$$NULLOREF
+		If '$IsObject(pStream) {
+			Set tFilename = pStream
+			Set pStream = ##class(%IO.FileStream).%New()
+			Do pStream.Open(tFilename,,pTimeout,"UTF-8", .tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set tObjectName = $parameter($this,"OBJECTNAME")
+		Set tObject = $classmethod(tObjectName,"%New")
+		If '$IsObject(tObject) {
+			Set tStatus = $$$ERROR($$$CannotCreateObject,tObjectName)
+			Quit
+		}
+		Set tObject.%Source = pStream.Name
+		Set tGetTopFields = $parameter(tObject,"INCLUDETOPFIELDS")
+		If pStream.AtEnd && (""=pLookAhead) {
+			Set tStatus = $$$ERROR($$$EnsRecordMapErrStreamAtEnd, pStream.Name)
+			Quit
+		}
+		Set pStream.CharEncoding = "UTF-8"
+
+		#; Parse incoming stream
+		Set tStatus = ..GetRecord(pStream, tObject, tGetTopFields, pTimeout, .pLookAhead, pLabelFound)
+		If $$$ISERR(tStatus) Quit
+	}
+	Catch ex {
+		Set tStatus = ex.AsStatus()
+	}
+	If $$$ISERR(tStatus) { Set pObject = $$$NULLOREF }
+	Else { Set pObject = tObject }
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="PutObject">
+<Description>
+Method to write a record to a stream or device. This method will be generated based on the
+structure of the RecordMap. For testing purposes, a file name may be passed in the pStream argument.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pFlush:%Boolean=1,&pPadArray:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+		Set tStatus = $$$OK
+		If '$IsObject(pStream) {
+			Set tFilename = pStream
+			Set pStream = ##class(%IO.FileStream).%New()
+			Do pStream.Open(tFilename,"WAE",,"UTF-8", .tStatus)
+			If $$$ISERR(tStatus) Quit
+		}
+		Set tHasTopFields = $parameter(pObject,"INCLUDETOPFIELDS")
+		Set pStream.CharEncoding = "UTF-8"
+
+		Set tStatus = ..PutRecord(pStream, pObject, tHasTopFields, .pPadArray)
+		If $$$ISERR(tStatus) Quit
+		If pFlush Do pStream.Flush(.tStatus)
+		If $$$ISERR(tStatus) Quit
+	}
+	Catch ex {
+		Set tStatus = ex.AsStatus()
+	}
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Parameter name="OBJECTNAME">
+<Default>FHIRHL7V2DEMOPKG.RecordMapSegtH.Record</Default>
+</Parameter>
+
+<Method name="GetRecord">
+<Description>
+Internal helper method to perform parse of incoming data</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pGetTopFields:%Boolean,pTimeout:%Numeric,&pLookAhead:%String="",pLabelFound:%Boolean=0]]></FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tStatus = $$$OK
+	If pLabelFound { Set tRecLabel = "" } 
+	Else { Set tRecLabel = "H|" } 
+	Set tStatus = ..chunkRecord(pStream, .tRecordData, .tCharCount, "", pTimeout, $char(13,10), tRecLabel, .pLookAhead, "")
+	If $$$ISERR(tStatus) Quit tStatus
+	Set tMaxLocal = $$$MaxLocalLength
+	Set tRecordData("charcount") = +$get(tCharCount)
+	Set tCurrChunk = 1
+	Set tTopPiece = 1
+	Set tCurrSep = 1
+	Set tStrings = 1
+	Set tCurrString = ""
+	Set tSeps = $listbuild($char(124),$char(94),$char(126))
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Else {
+		Set tCurrString = tRecordData(tCurrChunk)
+		Set tCurrPiece = 1
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.DefSeparateur = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.NomFichier = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.Champ4 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	Set tStrings(tStrings) = tCurrString
+	Set tStrings(tStrings+1) = $piece(tStrings(tStrings), $char(94), 1)
+	Set tStrings = tStrings + 1
+	Set pObject.codificationEmmeteur.Codification = tStrings(tStrings)
+	Kill tStrings(tStrings)
+	Set tStrings = tStrings - 1
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.Champ6 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.Typemessage = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ8 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ9 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.IdRecepteur = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.champ11 = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.ModeTraitement = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.Version = tCurrString
+	}
+	If '$data(tRecordData(tCurrChunk, "block")) {
+		Set tCurrString = $piece(tRecordData(tCurrChunk), $char(124), tTopPiece)
+	}
+	Do ..checkMerge(.tCurrChunk, .tRecordData, .tCurrString, $char(124), .tTopPiece)
+	If pGetTopFields {
+		Set pObject.DateMessage = tCurrString
+	}
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="PutRecord">
+<Description>
+Internal helper method to output object to a stream</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pStream:%IO.DeviceStream,pObject:%RegisteredObject,pHasTopFields:%Boolean,&pPadArray:%String]]></FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tStatus = $$$OK
+	Do pStream.Write("H|",,.tStatus)
+	If $$$ISERR(tStatus) Quit tStatus
+	Do pStream.Write($select(pHasTopFields: pObject.DefSeparateur,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.NomFichier,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.Champ4,1: ""),0)
+	Do pStream.Write($char(124),0)
+	Do pStream.Write(pObject.codificationEmmeteur.Codification,0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.Champ6,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.Typemessage,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ8,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ9,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.IdRecepteur,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.champ11,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.ModeTraitement,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.Version,1: ""),0)
+	Do pStream.Write($char(124) _ $select(pHasTopFields: pObject.DateMessage,1: ""),0)
+	Do pStream.Write($char(13,10), 0, .tStatus)
+	If $$$ISERR(tStatus) Quit tStatus
+	Quit tStatus
+]]></Implementation>
+</Method>
+
+<Method name="GetGeneratedClasses">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pClasses:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Kill pClasses
+	Set pClasses("FHIRHL7V2DEMOPKG.RecordMapSegtH.Record")=""
+	Set pClasses("FHIRHL7V2DEMOPKG.RecordMapSegtH.Record.codificationEmmeteur")=""
+	Set pClasses($classname())=""
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="getIdentifier">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec/>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA["H|"
+]]></Implementation>
+</Method>
+
+<Method name="getType">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec/>
+<ReturnType>EnsLib.RecordMap.Model.DataType.RecordType</ReturnType>
+<Implementation><![CDATA["delimited"
+]]></Implementation>
+</Method>
+
+<XData name="RecordMap">
+<XMLNamespace>http://www.intersystems.com/Ensemble/RecordMap</XMLNamespace>
+<Data><![CDATA[
+<Record xmlns="http://www.intersystems.com/Ensemble/RecordMap" name="FHIRHL7V2DEMOPKG.RecordMapSegtH" type="delimited" char_encoding="UTF-8" targetClassname="FHIRHL7V2DEMOPKG.RecordMapSegtH.Record" complexBatchManaged="1" label="H|" padFromLeft="0" recordTerminator="\x0d\x0a" allowEarlyTerminator="0">
+  <Separators>
+    <Separator>|</Separator>
+    <Separator>^</Separator>
+    <Separator>~</Separator>
+  </Separators>
+  <Field name="DefSeparateur" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="NomFichier" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="Champ4" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Composite name="codificationEmmeteur" required="0" ignored="0">
+    <Field name="codificationEmmeteur.Codification" required="0" ignored="0" datatype="%String" repeating="0">
+    </Field>
+  </Composite>
+  <Field name="Champ6" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="Typemessage" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ8" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ9" required="0" ignored="0" datatype="%String">
+  </Field>
+  <Field name="IdRecepteur" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="champ11" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="ModeTraitement" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="Version" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+  <Field name="DateMessage" required="0" ignored="0" datatype="%String" repeating="0">
+  </Field>
+</Record>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="HL7.ORU.RouterRoutingRule">
+<Description>
+</Description>
+<Super>Ens.Rule.Definition</Super>
+<TimeChanged>65736,29262.785158</TimeChanged>
+<TimeCreated>65736,29262.774842</TimeCreated>
+
+<Parameter name="RuleAssistClass">
+<Default>EnsLib.HL7.MsgRouter.RuleAssist</Default>
+</Parameter>
+
+<XData name="RuleDefinition">
+<XMLNamespace>http://www.intersystems.com/rule</XMLNamespace>
+<Data><![CDATA[
+<ruleDefinition alias="" context="EnsLib.HL7.MsgRouter.RoutingEngine" production="FHIRHL7V2DEMOPKG.FoundationProduction">
+<ruleSet name="" effectiveBegin="" effectiveEnd="">
+<rule name="">
+</rule>
+</ruleSet>
+</ruleDefinition>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="HL7.ORU.TransformToSDA3">
+<ClassType>persistent</ClassType>
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>65715,28280.58641</TimeChanged>
+<TimeCreated>65715,24225.562464</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>TargetConfigName</Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Method name="OnRequest">
+<FormalSpec>pRequest:EnsLib.HL7.Message,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	 Try {
+         // Convert the HL7 message to SDA3
+         Set tSC = ##class(HS.Gateway.HL7.HL7ToSDA3Custom).GetSDA(pRequest,.tSDA3Stream)
+         $$$LOGINFO("1.SDA from HL7!")
+         Quit:$$$ISERR(tSC)
+        
+        //Prepare a XML message (We can send an SDA container)
+		set tRequest=##class(HS.Message.XMLMessage).%New()
+		set tRequest.ContentStream=tSDA3Stream
+		set tRequest2=##class(Ens.StreamContainer).%New(tSDA3Stream)
+		$$$LOGINFO("2.Content SDA is prepared!")
+	
+		
+ 
+         // Call the target source operation to transform the SDA content to Fhir
+         set tSC=..SendRequestAsync(..TargetConfigName,tRequest2,.pResponse)
+         Quit:$$$ISERR(tSC)
+       } Catch ex {
+                    Set tSC= ex.AsStatus()
+       }
+         Quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>TransformToSDA3DefaultData</DefaultData>
+<Data name="TransformToSDA3DefaultData">
+<Subscript>"TransformToSDA3"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="JSON.FHIR.GETDATA">
+<Super>Ens.BusinessProcess,%JSON.Adaptor</Super>
+<TimeChanged>65826,64998.613637</TimeChanged>
+<TimeCreated>65826,59161.463451</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>TargetConfigName</Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Method name="OnRequest">
+<FormalSpec>pRequest:Ens.StreamContainer,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+	// Get json content from the stream Container
+	set tSC=1
+	
+	Set jsonData=pRequest.StreamGet()
+	set stream=##class(%DynamicObject).%FromJSON(jsonData)
+	$$$LOGINFO("Step 1 done !")
+	Quit:$$$ISERR(tSC)
+	
+	//Read the content of 
+ 	set text = ""
+         do jsonData.Rewind()
+         while 'jsonData.AtEnd { 
+         set text = jsonData.Read()
+        }
+        $$$LOGINFO("JSON from request  op1: "_stream.%ToJSON())
+        $$$LOGINFO("JSON from request op 2: "_text)
+ 
+	
+	
+	
+	
+	//set tSC=..SendRequestAsync("HS.FHIR.DTL.Util.HC.SDA3.FHIR.ProcessForSUI",tRequest2,.pResponse)
+	$$$LOGINFO("Getting JSON data is done !")
+	Quit:$$$ISERR(tSC)
+	} Catch ex {
+	Set tSC= ex.AsStatus()
+	}
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>GETDATADefaultData</DefaultData>
+<Data name="GETDATADefaultData">
+<Subscript>"GETDATA"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="SDAtoHL7dtl.RoutingEnginetest1">
+<Description>
+</Description>
+<Super>Ens.Rule.Definition</Super>
+<TimeChanged>65694,36930.527683</TimeChanged>
+<TimeCreated>65693,54468.770999</TimeCreated>
+
+<Parameter name="RuleAssistClass">
+<Default>EnsLib.MsgRouter.RuleAssist</Default>
+</Parameter>
+
+<XData name="RuleDefinition">
+<XMLNamespace>http://www.intersystems.com/rule</XMLNamespace>
+<Data><![CDATA[
+<ruleDefinition alias="" context="EnsLib.MsgRouter.RoutingEngine" production="FHIRHL7V2DEMOPKG.FoundationProduction">
+<ruleSet name="" effectiveBegin="" effectiveEnd="">
+<rule name="">
+<constraint name="source" value="User.SDA3toHL7"></constraint>
+<when condition="1=1">
+<send transform="HS.Gateway.SDA3.SDA3ToHL7.ADTA0Nversionwafik" target="HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process"></send>
+<return></return>
+</when>
+</rule>
+</ruleSet>
+</ruleDefinition>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="User.FTPprod">
+<Super>Ens.BusinessService</Super>
+<TimeChanged>65895,30554.491669</TimeChanged>
+<TimeCreated>65874,38319.447661</TimeCreated>
+
+<Parameter name="ADAPTER">
+<Default>Ens.InboundAdapter</Default>
+</Parameter>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>TargetConfigName</Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Method name="OnProcessInput">
+<FormalSpec>pInput:%Stream.Object,*pOutput:%Stream.Object</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+   
+ /*********** Create a HTTP Request (GET) *************/
+ 
+  $$$LOGINFO("1: ...from FTProd BS" )
+  
+  Set tSC = $$$OK
+  
+  try { 
+    
+     set httprequest = ##class(%Net.HttpRequest).%New()
+     set HttpResponse = ##class(%Net.HttpResponse).%New()
+     set httprequest.Https = 1
+     set httprequest.ContentType  = "application/fhir+json"
+     set httprequest.ContentCharset ="UTF-8"
+     set httprequest.Server ="fhir-server.d3.synodis.ftprod.fr"
+    // set httprequest.Port = 443
+     set httprequest.SSLConfiguration ="testSedki"  
+    // set httprequest.SSLConfiguration ="testwafik"  
+     set status = httprequest.Get("/fhir/Organization?_format=json&_pretty=true&_count=1")  
+     
+     Set Result = [].%FromJSON(httprequest.HttpResponse.Data)
+     Set text = Result.%ToJSON()
+     $$$LOGINFO("1.2: GET Result : " _text)
+     
+     /*************************** Prepare a streamContainer include the retrieved text And Send it to BO *****************************/
+    
+     set FtpStream = ##class(%Stream.GlobalCharacter).%New()
+     do FtpStream.Write(text)
+     $$$LOGINFO("2 : " _FtpStream.Write(text))
+      
+ 	 set FtpRequest2=##class(Ens.StreamContainer).%New(FtpStream)	
+ 	 $$$LOGINFO("3 : " _FtpRequest2)
+     
+     set tSC=..SendRequestAsync("FTProd.Json.Out",FtpRequest2,.pOutput)
+     $$$LOGINFO("4: message envoyé au BO.. ")
+     
+     Quit:$$$ISERR(tSC)
+     
+       //Quit:$$$ISERR(status2)    
+     }
+     
+   Catch ex {
+	Set tSC= ex.AsStatus()
+	}
+
+	Quit tSC
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Class name="User.Frésénius">
+<Super>Ens.BusinessService,%Persistent</Super>
+<TimeChanged>65668,49806.114104</TimeChanged>
+<TimeCreated>65668,35653.344784</TimeCreated>
+
+<Parameter name="ADAPTER">
+<Default>Ens.InboundAdapter</Default>
+</Parameter>
+
+<Method name="OnProcessInput">
+<FormalSpec>pInput:EnsLib.SQL.Snapshot,*pOutput:%RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+			$$$LOGINFO("BDD DATA... ")
+
+			&sql(CREATE TRIGGER TrigTestDummy AFTER INSERT ON SQLUser.testtable 
+			LANGUAGE OBJECTSCRIPT { 
+			
+		  			SET myquery ="select * from  testtable"
+		  			set statement=##class(%SQL.Statement).%New()
+		  			set status=statement.%Prepare(myquery)
+		  			set rset=statement.%Execute()
+		  			set pr=##class(User.testtableequest).%New()
+		  			 While rset.%Next()
+		  			  {
+		  			  $$$LOGINFO("lollllllllllllll ")
+		  			  set noms=rset.%Get("nom")
+		  			  $$$LOGINFO(noms)
+		  			   }
+		  			   }
+					  )
+				
+	QUIT 1
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Class name="User.HL7.JsonProcess">
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>65884,56010.01273</TimeChanged>
+<TimeCreated>65806,53842.836808</TimeCreated>
+
+<Property name="ServerName">
+<Type>%String</Type>
+</Property>
+
+<Property name="Port">
+<Type>%String</Type>
+</Property>
+
+<Property name="SSLConfiguration">
+<Type>%String</Type>
+</Property>
+
+<Property name="ContentType">
+<Type>%String</Type>
+</Property>
+
+<Property name="Https">
+<Type>%String</Type>
+</Property>
+
+<Property name="ContentCharset">
+<Type>%String</Type>
+</Property>
+
+<Property name="Username">
+<Type>%String</Type>
+</Property>
+
+<Property name="Password">
+<Type>%String</Type>
+</Property>
+
+<Parameter name="SETTINGS">
+<Default>ServerName,Port,SSLConfiguration,ContentType,Https,ContentCharset,Username,Password</Default>
+</Parameter>
+
+<Method name="OnRequest">
+<FormalSpec>pFhirRequest:HS.Message.FHIR.Request,*pFhirResponse:Ens.StreamContainer</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+
+	Set tSC = $$$OK
+
+	Try {
+		
+	 /*********** Extract JSON message *************/
+	  	  
+	 set str=pFhirRequest.Payload 
+	 $$$LOGINFO("JSON Message! Etape 1 : "_str)
+	 
+       set text = ""
+       do str.Rewind()
+       while 'str.AtEnd {
+       set text = str.Read()
+       }     
+     $$$LOGINFO("JSON Message! Etape 2 : "_text)
+     
+     
+     /*********** Create and Set up a REST API  *************/
+   
+     set httprequest = ##class(%Net.HttpRequest).%New()
+     set HttpResponse = ##class(%Net.HttpResponse).%New()
+     
+     //set httprequest.Server ="51.11.241.187"
+     set httprequest.Server =..ServerName
+     $$$LOGINFO("Setting the server address... ")
+      //set httprequest.Port = 52776
+     set httprequest.Port = ..Port
+     $$$LOGINFO("Setting the server port... ")
+     //set httprequest.ContentType  = ("application/fhir+json;charset=UTF-8")
+     set httprequest.ContentType  = ..ContentType
+     $$$LOGINFO("Setting the content-type... ")
+     //set httprequest.ContentCharset ="UTF-8"
+     set httprequest.ContentCharset =..ContentCharset
+     
+     //set httprequest.SSLConfiguration ="testSedki"  
+
+     //set httprequest.Username=..Username
+     set httprequest.Username="sghanmi"
+     //set httprequest.Password=..Password
+     set httprequest.Password="Sedki09248104"
+     //set httprequest.Authorization=("Basic <aturki:Cc$18Mm!>")
+     set httprequest.Authorization=("Basic c2doYW5taTpTZWRraTA5MjQ4MTA0")   
+     $$$LOGINFO("Setting credentials... ")
+      
+
+     
+     /*********** Create a HTTP GET Request  *************/
+     /*set status = httprequest.Get("/fhirhl7v2demo/fhir/r4/Patient?_count=1")  
+      $$$LOGINFO("Geting response from FHIR server... ")
+        Set Result = [].%FromJSON(httprequest.HttpResponse.Data)
+        $$$LOGINFO("Data retrieved :"_Result.%ToJSON()) **/
+   
+    
+     
+     /*********** Create a HTTP POST Request  *************/
+      d httprequest.EntityBody.Write(text)
+      //set httprequest.ContentType  = ("application/json;charset=UTF-8")
+      set status = httprequest.Post("/fhirhl7v2demo/fhir/r4/")
+      $$$LOGINFO("Get response from FHIR server... ")
+      set Result = [].%FromJSON(httprequest.HttpResponse.Data)
+        $$$LOGINFO("Data : "_Result.%ToJSON()) 
+
+      if $$$ISERR(status) {
+            do $system.OBJ.DisplayError()	
+            $$$LOGINFO(" Bundle non crée !!! ")
+            
+      } else {
+            set response=httprequest.HttpResponse
+            
+            $$$LOGINFO(" Bundle crée ! ")
+            
+            $$$LOGINFO("Response is : " _httprequest.HttpResponse.Data)
+      }
+       Quit:$$$ISERR(status)
+
+	 } 
+	 Catch eException {
+	  set tSC = eException.AsStatus()	
+	 }
+		
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>JsonProcessDefaultData</DefaultData>
+<Data name="JsonProcessDefaultData">
+<Subscript>"JsonProcess"</Subscript>
+<Value name="1">
+<Value>ServerName</Value>
+</Value>
+<Value name="2">
+<Value>Port</Value>
+</Value>
+<Value name="3">
+<Value>SSLConfiguration</Value>
+</Value>
+<Value name="4">
+<Value>ContentType</Value>
+</Value>
+<Value name="5">
+<Value>Https</Value>
+</Value>
+<Value name="6">
+<Value>ContentCharset</Value>
+</Value>
+<Value name="7">
+<Value>Username</Value>
+</Value>
+<Value name="8">
+<Value>Password</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="User.HL7.SDAToFHIR">
+<ClassType>persistent</ClassType>
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>65793,64655.719165</TimeChanged>
+<TimeCreated>65793,59543.726134</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>TargetConfigName</Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Method name="OnRequest">
+<FormalSpec>request:HS.Message.FHIR.Request,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	
+	Quit 1
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>SDAToFHIRDefaultData</DefaultData>
+<Data name="SDAToFHIRDefaultData">
+<Subscript>"SDAToFHIR"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="User.HL7.SIUtoSDA">
+<ClassType>persistent</ClassType>
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>65799,51790.170634</TimeChanged>
+<TimeCreated>65784,35961.786661</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>TargetConfigName</Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Method name="OnRequest">
+<FormalSpec>pRequest:EnsLib.HL7.Message,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+	// Convert the HL7 message to SDA3
+	Set tSC = ##class(HS.Gateway.HL7.HL7ToSDA3).GetSDA(pRequest,.tSDA3Stream)
+	$$$LOGINFO("1.SDA from HL7!")
+	Quit:$$$ISERR(tSC)
+	
+	//Prepare a XML message (We can send an SDA container)
+ 	set tRequest=##class(HS.Message.XMLMessage).%New()
+ 	set tRequest.ContentStream=tSDA3Stream
+ 	set tRequest2=##class(Ens.StreamContainer).%New(tSDA3Stream)
+ 	$$$LOGINFO("2.Content SDA is prepared!")
+	
+	
+	//Prepare a JSON message
+	
+	//set tRequest2 = tRequest2.%ToJSON()
+	$$$LOGINFO("Conversion of the request object to JSON format... ")
+
+    //Set str=##class(%GlobalBinaryStream).%New()
+    //Set status=##class(Ens.Util.JSON).ObjectToJSONStream(tSDA3Stream,str)
+        
+    
+	//set tRequest=##class(HS.JSON.Adaptor).%New()
+	//do tRequest.%JSONExport()
+	//$$$LOGINFO("2.Message JSON is prepared!")
+	//do tRequest.%JSONExport()
+	//set tRequest2=##class(JSON.Adaptor).%New()	
+	//do tRequest2.%JSONExport()
+	//$$$LOGINFO("Message JSON is prepared!")
+	//write ["\u00E9",(tRequest2)].%ToJSON()
+         
+	
+	// Call the target source operation to transform the SDA content to Fhir
+	set tSC=..SendRequestAsync("HS.FHIR.DTL.Util.HC.SDA3.FHIR.ProcessForSUI",tRequest2,.pResponse)
+	Quit:$$$ISERR(tSC)
+	} Catch ex {
+	Set tSC= ex.AsStatus()
+	}
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>SIUtoSDADefaultData</DefaultData>
+<Data name="SIUtoSDADefaultData">
+<Subscript>"SIUtoSDA"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="User.HL7.ShowJSON">
+<Super>Ens.BusinessOperation</Super>
+<TimeChanged>65806,29413.995456</TimeChanged>
+<TimeCreated>65797,53958.447651</TimeCreated>
+
+<Parameter name="INVOCATION">
+<Default>Queue</Default>
+</Parameter>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+</Parameter>
+
+<Method name="SIUJsonTest">
+<FormalSpec>pFhirRequest:HS.Message.FHIR.Request,*pFhirResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+
+	Set tSC = $$$OK
+	$$$LOGINFO("JSON Message! Etape 1 : "_pFhirRequest)
+	
+	Try {
+	// For any incoming request payload, create a %DynamicObject and assign
+	// it to the Json property of the FHIR request object.
+	
+	set XMLDoc=##class(%XML.TextReader).ParseFile(pFhirRequest,.reader)
+	
+	set writer=##class(%XML.Writer).%New()
+
+    set str=##class(%GlobalCharacterStream).%New() 
+    
+    set status=writer.OutputToStream(str)
+    
+   // if $$$ISERR(status) {do $System.Status.DisplayError(status) quit ""}
+
+   //write to the stream
+   set status=writer.RootObject(pFhirRequest)
+  // if $$$ISERR(status) {do $System.Status.DisplayError(status) quit }
+
+   Set status = ##class(%XML.TextReader).ParseStream(str,.textreader)
+  
+   //check status
+   // If $$$ISERR(status) {do $System.Status.DisplayError(status) quit}
+  
+   //iterate through document, node by node
+   While textreader.Read()
+   {
+     If (textreader.NodeType = "element")
+     {
+        Set jyson = textreader.Payload
+       
+       }
+       $$$LOGINFO("JSON Message! Etape 2 : "_jyson)
+   
+     }
+
+    $$$LOGINFO("Hi, JSON Message!!!")
+    
+
+	
+	 } 
+	 Catch eException {
+	  set tSC = eException.AsStatus()	
+	}
+		
+	Quit tSC
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Class name="User.HL7.TestSIUtoFHIR">
+<ClassType>persistent</ClassType>
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>65884,56010.83305</TimeChanged>
+<TimeCreated>65792,52513.199785</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>TargetConfigName</Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Method name="OnRequest">
+<FormalSpec>pRequest:EnsLib.HL7.Message,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+	
+	// Convert the HL7 message to SDA3
+	Set tSC = ##class(HS.Gateway.HL7.HL7ToSDA3).GetSDA(pRequest,.tSDA3Stream)
+	$$$LOGINFO("1.SDA from HL7!")
+	Quit:$$$ISERR(tSC)
+	
+	//Prepare an XML message (send an SDA container)
+ 	set tRequest=##class(HS.Message.XMLMessage).%New()
+ 	set tRequest.ContentStream=tSDA3Stream
+ 	set tRequest2=##class(Ens.StreamContainer).%New(tSDA3Stream)
+ 	$$$LOGINFO("2.Content SDA is prepared!")
+
+	
+	// Call the target source operation to transform the SDA content to Fhir
+		
+	//set tSC=..SendRequestAsync("HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process",tRequest2,.pResponse)
+	set tSC=..SendRequestAsync("HS.FHIR.DTL.Util.HC.SDA3.FHIR.ProcessForSUI",tRequest2,.pResponse)
+	$$$LOGINFO("Message SIU Transfer from TestConverToJSON Process to ProcessForSUI.")
+	Quit:$$$ISERR(tSC)
+	} Catch ex {
+	Set tSC= ex.AsStatus()
+	}
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>TestSIUtoFHIRDefaultData</DefaultData>
+<Data name="TestSIUtoFHIRDefaultData">
+<Subscript>"TestSIUtoFHIR"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="User.HT7toFHIR">
+<ClassType>persistent</ClassType>
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>65714,52500.177622</TimeChanged>
+<TimeCreated>65714,52327.527307</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Default><![CDATA[TargetConfigName:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId},TransformFile:Basic]]></Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>Ens.DataType.ConfigName</Type>
+<InitialExpression>"HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process"</InitialExpression>
+</Property>
+
+<Method name="OnRequest">
+<Description>
+Transforms an HL7 message to SDA, an internal healthcare format for InterSystems IRIS for Health.</Description>
+<FormalSpec>pRequest:EnsLib.HL7.Message,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set tSC = $$$OK
+	try {
+         set tSC = ##class(HS.Gateway.HL7.HL7ToSDA3).GetSDA(pRequest,.tSDA)
+         set tSC = ..SendRequestSync(..TargetConfigName,##class(Ens.StreamContainer).%New(tSDA),.pResponse)
+	} catch ex {
+		set tSC = ex.AsStatus()
+	}
+	
+	quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>HT7toFHIRDefaultData</DefaultData>
+<Data name="HT7toFHIRDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"HT7toFHIR"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="User.Identite">
+<Super>Ens.BusinessOperation</Super>
+<TimeChanged>65755,49135.116026</TimeChanged>
+<TimeCreated>65630,29988.735563</TimeCreated>
+
+<Property name="Adapter">
+<Type>EnsLib.EMail.OutboundAdapter</Type>
+</Property>
+
+<Method name="DecoupageMessage">
+<FormalSpec>pRequest:Ens.StreamContainer,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ 
+		////////////////////////get token/////////////////////////////////////////////////////////////////////////
+		 $$$LOGINFO("hello")
+		   
+		     set request=##class(%Net.HttpRequest).%New()
+		     do request.SetHeader("Authorization","Basic ZTU1ODAyNzVmNzcyNDY2YTg5NDkyNWJlNDc3YzM5NjY6TWpnMllXTXlZemt0WWpaa1pTMDBZVGhoTFdFeU1EQXRPVEpqWm1Vd1kyTXdaR0kw")
+		     do request.SetHeader("Content-Type","application/x-www-form-urlencoded")
+		     do request.EntityBody.Write("grant_type=client_credentials")
+		     set request.SSLConfiguration = "testwafik"
+             set status=request.Post("https://www.rec2.docapost.io/hub/v2/oauth/token/")
+             $$$LOGINFO("status"_status)
+        
+             set jsonData = {}.%FromJSON(request.HttpResponse.Data)   
+           
+             //$$$LOGINFO("jsonData"_jsonData)	
+             Set Token = jsonData.%ToJSON()
+			 
+			 $$$LOGINFO(Token)
+	
+			    set iter = jsonData.%GetIterator()
+			    set x  = iter.%GetNext(.key , .tokenvalue ) 
+			    $$$LOGINFO(tokenvalue)
+			 
+
+
+			    	//////////////////flux identité////////////////////////////////////////////////////////////////////
+
+	$$$LOGINFO("Hello identite")
+
+  	set pInput = pRequest.Stream
+  	//$$$LOGINFO("pInput :"_pInput)
+ 	 set stringStream = "" 
+  	
+		While 'pInput.AtEnd {
+		Set line=pInput.ReadLine()
+		//$$$LOGINFO("coded line :"_line)
+		//set stringStream=stringStream_line_"\n"
+		set stringStream=stringStream_line
+		
+		} 
+		
+		
+		
+		SET urli = $ZCONVERT(stringStream,"I","JS")
+		SET stringStream = $ZCONVERT(urli,"I","UTF8")
+  
+  
+		$$$LOGINFO("StrinfStream :"_stringStream)
+		
+	
+	
+			set messageX ={}
+			set messageX.message =stringStream
+			//$$$LOGINFO("mess :"_messageX.%ToJSON())
+		
+             Set T = messageX
+			
+			
+			$$$LOGINFO(T.%ToJSON())
+			set message = T
+	
+			//set message = {"message": "MSH|^~\\&|MCK|MCK|EAI|EAI|20200228160137||ADT^A04^ADT_A01|218935|P|2.5^FRA^2.5|191888||||FRA|8859/1|||A03^IPG~ADD_ENTREE_HOPITAL^INTEG\nEVN||20200228155838|||LUDCAR\nPID|||412234^^^MCK&1.2.250.1.255.10.200.2&L^PI~1234567890^^^^PT||MARC^MICHEL^^^M^^L~MARC^MICHEL^^^M^^D||19551201|M|||87  RUE DES PYRENEES^^MARCK^^22730^FRA^H~^^^^^UNK^C~^^^^^UNK^BR||0675000102^PRN^PH~33757911877^PRN^CP^PRN^CP^^^^^^1^^^33757911877~^NET^Internet^patient.p1@yopmail.com|||U||900042096^^^MCK|||||33063|||FRA||||N||PROV\nPD1||||||||||||N\nPV1||O|2505|||||||557||||||N|||900042096^^^MCK&1.2.250.1.255.12.1.1&L^AN|C|07||||||||||||||||||||N|||20200228155800|20200228235900\nPV2|||||||AG\nZBE|EH_488847_1^MCK|20200228155800||INSERT|N||^^^^^^UF^^25051^2505|^^^^^^UF|M\nZFP| | \nZFV| \nZFM| \nIN1|1|623|||||||||||20200831|||PRUNIER^FRANCK|||||||||||||||||||||||||||||||||172046219321559"}
+			set request=##class(%Net.HttpRequest).%New()
+		    Set HttpResponse=##class(%Net.HttpResponse).%New()
+		    do request.SetHeader("Content-Type","application/json;charset=UTF-8")
+		    set token2 = "Bearer "_tokenvalue
+		    do request.SetHeader("Authorization",token2)
+			
+		     set request.SSLConfiguration = "testwafik"
+		     do request.EntityBody.Write(message.%ToJSON())
+             set status=request.Post("https://www.rec2.docapost.io/hub/v2/api/caih/consents/")
+             $$$LOGINFO("status"_status)
+             
+           
+            $$$LOGINFO("test" _request.HttpResponse.StatusCode)
+               Set Result = [].%FromJSON(request.HttpResponse.Data)
+             Set Token = Result.%ToJSON()
+    
+            $$$LOGINFO("Token"_Token)
+            
+	
+	
+	
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<XData name="MessageMap">
+<Data><![CDATA[
+<MapItems>
+	<MapItem MessageType="Ens.StreamContainer"> 
+		<Method>DecoupageMessage</Method>
+	</MapItem>
+</MapItems>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="User.JsonBProcess">
+<ClassType>persistent</ClassType>
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>65806,52830.176317</TimeChanged>
+<TimeCreated>65806,51677.560608</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+</Parameter>
+
+<Method name="ShowJsonTest">
+<FormalSpec>pFhirRequest:EnsLib.HL7.Message,*pFhirResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+
+	Set tSC = $$$OK
+	$$$LOGINFO("JSON Message! Etape 1 : "_pFhirRequest)
+	
+	Try {
+	// For any incoming request payload, create a %DynamicObject and assign
+	// it to the Json property of the FHIR request object.
+	
+	set XMLDoc=##class(%XML.TextReader).ParseFile(pFhirRequest,.reader)
+	
+	set writer=##class(%XML.Writer).%New()
+
+    set str=##class(%GlobalCharacterStream).%New() 
+    
+    set status=writer.OutputToStream(str)
+    
+   // if $$$ISERR(status) {do $System.Status.DisplayError(status) quit ""}
+
+   //write to the stream
+   set status=writer.RootObject(pFhirRequest)
+  // if $$$ISERR(status) {do $System.Status.DisplayError(status) quit }
+
+   Set status = ##class(%XML.TextReader).ParseStream(str,.textreader)
+  
+   //check status
+   // If $$$ISERR(status) {do $System.Status.DisplayError(status) quit}
+  
+   //iterate through document, node by node
+   While textreader.Read()
+   {
+     If (textreader.NodeType = "element")
+     {
+        Set jyson = textreader.Payload
+       
+       }
+       $$$LOGINFO("JSON Message! Etape 2 : "_jyson)
+   
+     }
+
+    $$$LOGINFO("Hi, JSON Message!!!")
+    
+    set tSC=..SendRequestAsync("HS.FHIR.DTL.Util.HC.SDA3.FHIR.ProcessForSUI",jyson,.pFhirResponse)
+	$$$LOGINFO("Message from ProcessForSUI to JSON Process")
+	Quit:$$$ISERR(tSC)
+	
+	 } 
+	 Catch eException {
+	  set tSC = eException.AsStatus()	
+	}
+		
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+</Storage>
+</Class>
+
+
+<Class name="User.ORUtoFHIR">
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>65891,43517.937169</TimeChanged>
+<TimeCreated>65807,38956.896744</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>TargetConfigName</Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>Ens.DataType.ConfigName</Type>
+<InitialExpression>"HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process"</InitialExpression>
+</Property>
+
+<Method name="OnRequest">
+<FormalSpec>pRequest:Ens.StreamContainer,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	 $$$LOGINFO("wafikkkkkk")
+
+	try {
+		set tSDA3Object = pRequest
+ 	 $$$LOGINFO("test "_tSDA3Object)
+     Set tQuickStream = ##class(HS.SDA3.QuickStream).%New()
+     $$$ThrowOnError(tSDA3Object.XMLExportToStream(.tQuickStream))
+     $$$LOGINFO("tQuickStream"_tQuickStream.Read())
+      set xx = ##class(Ens.StreamContainer).%New()
+      set xx.Stream = tQuickStream.Read()
+    
+       set trasf = ..SendRequestSync(..TargetConfigName,##class(Ens.StreamContainer).%New(xx),.pResponse)
+       
+        
+   } catch ex {
+		set trasf = ex.AsStatus()
+	}
+	quit trasf
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>ORUtoFHIRDefaultData</DefaultData>
+<Data name="ORUtoFHIRDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"ORUtoFHIR"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="User.SDA3toHL7">
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>65694,36948.12873</TimeChanged>
+<TimeCreated>65693,53025.442768</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Default><![CDATA[TargetConfigName:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId},TransformFile:Basic]]></Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>Ens.DataType.ConfigName</Type>
+<InitialExpression>"RoutingEnginetest1"</InitialExpression>
+</Property>
+
+<Method name="OnRequest">
+<Description>
+Transforms an HL7 message to SDA, an internal healthcare format for InterSystems IRIS for Health.</Description>
+<FormalSpec>pRequest:EnsLib.HL7.Message,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set tSC = $$$OK
+	try {
+         set tSC = ##class(HS.Gateway.HL7.HL7ToSDA3).GetSDA(pRequest,.tSDA)
+         //wafik ajout
+         set xxl2 = ##class(EnsLib.EDI.XML.Document).%New(tSDA)
+         set xxl = ##class(Ens.StreamContainer).%New(tSDA)
+         $$$LOGINFO(xxl.Type)
+         set tSC = ..SendRequestSync(..TargetConfigName,xxl2,.pResponse)
+	} catch ex {
+		set tSC = ex.AsStatus()
+	}
+	quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>SDA3toHL7DefaultData</DefaultData>
+<Data name="SDA3toHL7DefaultData">
+<Structure>listnode</Structure>
+<Subscript>"SDA3toHL7"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="User.SDA3toHL7Final">
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>65709,35084.380594</TimeChanged>
+<TimeCreated>65709,32305.591977</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Default><![CDATA[TargetConfigName:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId},TransformFile:Basic]]></Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>Ens.DataType.ConfigName</Type>
+<InitialExpression>"HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process"</InitialExpression>
+</Property>
+
+<Method name="OnRequest">
+<Description>
+Transforms an HL7 message to SDA, an internal healthcare format for InterSystems IRIS for Health.</Description>
+<FormalSpec>pRequest:EnsLib.EDI.XML.Document,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set tSC = $$$OK
+	try {
+	
+         //set xxl2 = ##class(EnsLib.EDI.XML.Document).%New(pRequest)     
+         //$$$LOGINFO("lol: "_xxl2)
+         
+         set tSC = ..SendRequestSync(..TargetConfigName,pRequest,.pResponse)
+	} catch ex {
+		set tSC = ex.AsStatus()
+	}
+	quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>SDA3toHL7FinalDefaultData</DefaultData>
+<Data name="SDA3toHL7FinalDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"SDA3toHL7Final"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="User.TrasnformHL7toCDAW">
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>65629,39032.33706</TimeChanged>
+<TimeCreated>65629,37856.471434</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Default><![CDATA[TargetConfigName:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId},TransformFile:Basic]]></Default>
+</Parameter>
+
+<Method name="OnRequest">
+<FormalSpec>pRequest:EnsLib.HL7.Message,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  $$$LOGINFO("Hello")
+  set tSC = $$$OK
+ Try {
+         // Convert the HL7 message to SDA3
+         Set tSC = ##class(HS.Gateway.HL7.HL7ToSDA3).GetSDA(pRequest,.tSDA3Stream)
+         Quit:$$$ISERR(tSC)
+ 
+         // Transform the SDA3 to a C-CDA
+         Set tTransformer = ##class(HS.Util.XSLTTransformer).%New()
+         Set t= tTransformer.Transform(tSDA3Stream,"SDA3/SDA-to-CCDA-CCD.xsl",.tCDAStream)
+         $$$LOGINFO(t)
+         $$$LOGINFO("response"_tCDAStream)
+       set tSC = ..SendRequestSync("HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process",##class(Ens.StreamContainer).%New(tCDAStream),.pResponse)
+
+       } Catch ex {
+                    Set tSC= ex.AsStatus()
+                   }
+         Quit 1
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+</Storage>
+</Class>
+
+
+<Class name="User.testwafik">
+<Super>Ens.BusinessService</Super>
+<TimeChanged>65630,39557.567098</TimeChanged>
+<TimeCreated>65630,29761.2364</TimeCreated>
+
+<Parameter name="ADAPTER">
+<Default>Ens.InboundAdapter</Default>
+</Parameter>
+
+<Parameter name="SETTINGS">
+<Default>TargetConfigNames,Query</Default>
+</Parameter>
+
+<Property name="TargetConfigNames">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Method name="OnProcessInput">
+<FormalSpec>pInput:%RegisteredObject,*pOutput:%RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	try{
+		
+		   $$$LOGINFO("hello")
+		   
+		     set request=##class(%Net.HttpRequest).%New()
+		     do request.SetHeader("Authorization","Basic ZTU1ODAyNzVmNzcyNDY2YTg5NDkyNWJlNDc3YzM5NjY6TWpnMllXTXlZemt0WWpaa1pTMDBZVGhoTFdFeU1EQXRPVEpqWm1Vd1kyTXdaR0kw")
+			do request.SetHeader("Content-Type","application/x-www-form-urlencoded")
+		// Do request.InsertFormData("grant_type","client_credentials")
+		 do request.EntityBody.Write("grant_type=client_credentials")
+		
+		     set request.SSLConfiguration = "testwafik"
+		
+		
+             set status=request.Post("https://www.rec2.docapost.io/hub/v2/oauth/token/")
+             $$$LOGINFO("status"_status)
+        
+             set jsonData = {}.%FromJSON(request.HttpResponse.Data)   
+           
+             	$$$LOGINFO("jsonData"_jsonData)	
+             Set Token = jsonData.%ToJSON()
+			 
+			 $$$LOGINFO(Token)
+			 
+			 
+			 
+			    set iter = jsonData.%GetIterator()
+	  /* while iter.%GetNext(.key , .value ) {
+	   
+	   	 $$$LOGINFO(value)
+	   
+	   }*/
+	   set x  = iter.%GetNext(.key , .value ) 
+	    $$$LOGINFO(value)
+			 
+			 
+			/* set xx =  {}.%FromJSON(Token) 
+             
+			 set coding2= xx.access_token
+    
+            $$$LOGINFO("Token"_coding2)*/
+    
+           	
+             
+             
+             
+              
+             
+	
+	
+	  Quit:$$$ISERR(status)
+       } Catch ex {
+                    Set status= ex.AsStatus()
+       }
+         Quit 1
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Document name="EnsExportNotes.EnsExportProduction_2021-09-15 13-54-26_437+0.PTD"><ProjectTextDocument name="EnsExportNotes.EnsExportProduction_2021-09-15 13-54-26_437+0" description="Export Notes for export EnsExportProduction_2021-09-15 13-54-26_437+0">
+<![CDATA[<Deployment>
+<Creation>
+<Machine>FHIRHL7V2DEMO</Machine>
+<Instance>IRIS</Instance>
+<Namespace>FHIRHL7V2DEMO</Namespace>
+<SourceProduction>FHIRHL7V2DEMOPKG.FoundationProduction</SourceProduction>
+<Username>wmahmoudi</Username>
+<UTC>2021-09-15 13:54:42.574</UTC>
+</Creation>
+<Notes>
+</Notes>
+<Contents>
+<ExportProject>EnsExportProduction_2021-09-15 13-54-26_437+0</ExportProject>
+<Item num="1">FHIR.Json.XML.UploadToServer.CLS</Item>
+<Item num="2">FHIRDemo.HL7TransformProcess.CLS</Item>
+<Item num="3">FHIRDemo.Service.POSTService.CLS</Item>
+<Item num="4">FHIRHL7V2DEMOPKG.AdicapRouteurRoutingRule.CLS</Item>
+<Item num="5">FHIRHL7V2DEMOPKG.RecordMapComplexeAdicap.Batch.CLS</Item>
+<Item num="6">FHIRHL7V2DEMOPKG.RecordMapComplexeAdicap.CLS</Item>
+<Item num="7">FHIRHL7V2DEMOPKG.RecordMapSegL.CLS</Item>
+<Item num="8">FHIRHL7V2DEMOPKG.RecordMapSegOBR.CLS</Item>
+<Item num="9">FHIRHL7V2DEMOPKG.RecordMapSegOBX1.CLS</Item>
+<Item num="10">FHIRHL7V2DEMOPKG.RecordMapSegP.CLS</Item>
+<Item num="11">FHIRHL7V2DEMOPKG.RecordMapSegtH.CLS</Item>
+<Item num="12">HL7.ORU.RouterRoutingRule.CLS</Item>
+<Item num="13">HL7.ORU.TransformToSDA3.CLS</Item>
+<Item num="14">JSON.FHIR.GETDATA.CLS</Item>
+<Item num="15">SDAtoHL7dtl.RoutingEnginetest1.CLS</Item>
+<Item num="16">User.FTPprod.CLS</Item>
+<Item num="17">User.Frésénius.CLS</Item>
+<Item num="18">User.HL7.JsonProcess.CLS</Item>
+<Item num="19">User.HL7.SDAToFHIR.CLS</Item>
+<Item num="20">User.HL7.SIUtoSDA.CLS</Item>
+<Item num="21">User.HL7.ShowJSON.CLS</Item>
+<Item num="22">User.HL7.TestSIUtoFHIR.CLS</Item>
+<Item num="23">User.HT7toFHIR.CLS</Item>
+<Item num="24">User.Identite.CLS</Item>
+<Item num="25">User.JsonBProcess.CLS</Item>
+<Item num="26">User.ORUtoFHIR.CLS</Item>
+<Item num="27">User.SDA3toHL7.CLS</Item>
+<Item num="28">User.SDA3toHL7Final.CLS</Item>
+<Item num="29">User.TrasnformHL7toCDAW.CLS</Item>
+<Item num="30">User.testwafik.CLS</Item>
+</Contents>
+<ProductionClassInExport></ProductionClassInExport>
+</Deployment>
+
+]]></ProjectTextDocument>
+</Document></Export>
