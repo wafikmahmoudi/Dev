@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="User.Tiggertest">
+<Super>%Persistent</Super>
+
+<Property name="nom">
+<Type>%Library.String</Type>
+<Parameter name="MAXLEN" value="256"/>
+</Property>
+
+<Property name="prenom">
+<Type>%Library.String</Type>
+<Parameter name="MAXLEN" value="256"/>
+</Property>
+
+<Trigger name="LogEvent">
+<Code><![CDATA[
+        &sql(INSERT INTO TestDummyLog 
+            (TableName,IDVal)
+            VALUES ('tabletest', 122))
+
+]]></Code>
+<Event>INSERT</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+
+
+Class User.Tiggertest Extends %Persistent
+{
+]]></Content>
+</UDLText>
+
+<Property name="nom">
+<Type>%Library.String</Type>
+<Parameter name="MAXLEN" value="256"/>
+</Property>
+
+<Property name="prenom">
+<Type>%Library.String</Type>
+<Parameter name="MAXLEN" value="256"/>
+</Property>
+
+<Trigger name="LogEvent">
+<Code><![CDATA[
+        &sql(INSERT INTO TestDummyLog 
+            (TableName,IDVal)
+            VALUES ('tabletest', 122))
+]]></Code>
+<Event>INSERT</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+}
+]]></Content>
+</UDLText>
+</Class>
+</Export>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="User.testtableequest">
+<Super>Ens.Request</Super>
+
+<Property name="nom">
+<Type>%Library.Char</Type>
+<Parameter name="MAXLEN" value="50"/>
+</Property>
+
+<Property name="prenom">
+<Type>%Library.Char</Type>
+<Parameter name="MAXLEN" value="50"/>
+</Property>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+Class User.testtableequest Extends Ens.Request
+{
+]]></Content>
+</UDLText>
+
+<Property name="nom">
+<Type>%Library.Char</Type>
+<Parameter name="MAXLEN" value="50"/>
+</Property>
+
+<Property name="prenom">
+<Type>%Library.Char</Type>
+<Parameter name="MAXLEN" value="50"/>
+</Property>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+}
+]]></Content>
+</UDLText>
+</Class>
+</Export>

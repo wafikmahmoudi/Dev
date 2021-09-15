@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="user2.testAPIR4">
+<Super>%CSP.REST</Super>
+
+<Method name="GetPatientOS">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+			Set tArr = []
+			set trt = []
+				set url = "/csp/healthshare/demo/fhir/r4"
+				set fhirService = ##class(HS.FHIRServer.Service).EnsureInstance(url)
+				set request = ##class(HS.FHIRServer.API.Data.Request).%New()
+				set request.RequestPath = "Patient/4485"
+				set request.RequestMethod = "GET"
+				do fhirService.DispatchRequest(request, .response)
+				set myPatient = response.Json
+				//w myPatient.%ToJSON() 
+				set myPatient = myPatient.%ToJSON() 
+				quit 1
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+
+
+
+
+Class user2.testAPIR4 Extends %CSP.REST
+{
+]]></Content>
+</UDLText>
+
+<Method name="GetPatientOS">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+			Set tArr = []
+			set trt = []
+				set url = "/csp/healthshare/demo/fhir/r4"
+				set fhirService = ##class(HS.FHIRServer.Service).EnsureInstance(url)
+				set request = ##class(HS.FHIRServer.API.Data.Request).%New()
+				set request.RequestPath = "Patient/4485"
+				set request.RequestMethod = "GET"
+				do fhirService.DispatchRequest(request, .response)
+				set myPatient = response.Json
+				//w myPatient.%ToJSON() 
+				set myPatient = myPatient.%ToJSON() 
+				quit 1
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+}
+]]></Content>
+</UDLText>
+</Class>
+</Export>

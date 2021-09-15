@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Mypl.Json.PostToFhir">
+<Super>Ens.BusinessService</Super>
+
+<Parameter name="ADAPTER">
+<Default>EnsLib.File.InboundAdapter</Default>
+</Parameter>
+
+<Property name="FilePath">
+<Type>%String</Type>
+</Property>
+
+<Parameter name="SETTINGS">
+<Default>FilePath</Default>
+</Parameter>
+
+<Method name="OnProcessInput">
+<FormalSpec>pInput:%FileCharacterStream,pOutput:%RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+
+   $$$LOGINFO("Starting Getting FHIR Data..." )
+   set TSC=1
+   
+  try { 
+    
+   
+   // Get data from json file
+    set jsonObj = [].%FromJSON(pInput)
+     $$$LOGINFO("Json in process..." )
+   set iter =jsonObj.%GetIterator()
+   Set observ={"resourceType":"Observation","id":"example","status":"final","code":{"coding":[{"system":"http://loinc.org","code":"29463-7","display":"Body Weight"}]},"subject":{"reference":"Patient/example"},"encounter":{"reference":"Encounter/example"},"effectiveDateTime":"2016-03-28","valueQuantity":{"value":185,"unit":"lbs","system":"http://unitsofmeasure.org","code":"[lb_av]"}}
+   Set clientObj = ##class(HS.FHIRServer.RestClient.FHIRService).CreateInstance("/csp/healthshare/ansfhirdev/fhir/r4f")
+   Do clientObj.SetResponseFormat("JSON")
+   while iter.%GetNext(.key, .value) {
+    //Create the json object of an observation
+    
+        //$$$LOGINFO("element:"_key )
+        //$$$LOGINFO(value.%ToJSON())
+        //$$$LOGINFO("label : "_value."label")
+        //$$$LOGINFO("valeur : "_value."value")
+        //$$$LOGINFO("code : "_value."code")
+        Set l=$ZCONVERT(value."label","I","UTF8")
+        //$$$LOGINFO("label after ZSTRIP : "_l)
+        if (value."label"="IPP")
+        {
+            $$$LOGINFO("observation value : "_observ."subject"."reference")
+            //do observ.%Set("subject","Patient/"_value."value")
+             Set observ.subject.reference="Patient/"_value."value"
+        }
+        
+        if ($ZCONVERT(value."label","I","UTF8")= "R_niv_1_Prélevé le")
+        {
+            
+            $$$LOGINFO("observation value : "_observ."effectiveDateTime")
+            //do observ.%Set("subject","Patient/"_value."value")
+             Set observ.effectiveDateTime=value."value"
+        }
+        
+        if (value."label"="NDA")
+        {
+            $$$LOGINFO("observation value : "_observ."encounter"."reference")
+            //do observ.%Set("subject","Patient/"_value."value")
+             Set observ.encounter.reference="Encounter/"_value."value"
+        }
+         //Step 1 : Selecting the ones with numeric values and set them to ValueQuantity
+        else{
+          
+          //1.1 Setting the code part of Observation
+         
+          //1.2 Setting the Value part of Observation
+         
+          if $ISVALIDNUM(value."value")
+          {
+
+
+            $$$LOGINFO("test is a number :"_value."value") 
+            set dynObjCoding={}
+            set dynObjCoding."code"=value."code"
+            set dynObjCoding."display"=$ZCONVERT(value."label","I","UTF8")
+            set observ."code"."coding"=dynObjCoding
+            set codingObj=observ."code"."coding"
+            $$$LOGINFO("coding :code :"_codingObj.%ToJSON())  
+            Set observ.valueQuantity.value=value."value"
+
+            //Posting on FHIR server
+              set requestpost = ##class(HS.FHIRServer.API.Data.Request).%New()
+              set requestpost.RequestPath = "/Observation"
+              set requestpost.RequestMethod = "POST"
+              $$$LOGINFO("Posting on server 2..")
+              set requestpost.Json = observ.%ToJSON()
+              $$$LOGINFO("Posting on server 3..")
+              set clientResponseObjpost=clientObj.InvokeRequest(requestpost)
+              $$$LOGINFO("Posting on server 4..")
+              Set FhirDatapost=clientResponseObjpost.Json
+              $$$LOGINFO("Posting on server 5..")
+              Set textpost = FhirDatapost
+              $$$LOGINFO("Posting on server 6.."_textpost.%ToJSON())
+
+          }
+         $$$LOGINFO("After update"_observ.%ToJSON())
+        }
+       
+    }
+     
+   
+   
+
+
+   
+  
+  
+   
+      
+      
+     
+       
+     
+  
+     }
+     
+   Catch ex {
+	Set TSC= ex.AsStatus()
+	}
+
+	Quit TSC
+]]></Implementation>
+</Method>
+</Class>
+</Export>

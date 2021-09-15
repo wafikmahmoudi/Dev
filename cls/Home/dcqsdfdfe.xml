@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Home.dcqsdfdfe">
+<Super>%Persistent</Super>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+ wef
+Class Home.dcqsdfdfe Extends %Persistent
+{
+wef
+
+}
+]]></Content>
+</UDLText>
+</Class>
+</Export>

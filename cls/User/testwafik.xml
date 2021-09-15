@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="User.testwafik">
+<Super>Ens.BusinessService</Super>
+
+<Parameter name="ADAPTER">
+<Default>Ens.InboundAdapter</Default>
+</Parameter>
+
+<Parameter name="SETTINGS">
+<Default>TargetConfigNames,Query</Default>
+</Parameter>
+
+<Property name="TargetConfigNames">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Method name="OnProcessInput">
+<FormalSpec>pInput:%RegisteredObject,*pOutput:%RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	try{
+		
+		   $$$LOGINFO("hello")
+		   
+		     set request=##class(%Net.HttpRequest).%New()
+		     do request.SetHeader("Authorization","Basic ZTU1ODAyNzVmNzcyNDY2YTg5NDkyNWJlNDc3YzM5NjY6TWpnMllXTXlZemt0WWpaa1pTMDBZVGhoTFdFeU1EQXRPVEpqWm1Vd1kyTXdaR0kw")
+			do request.SetHeader("Content-Type","application/x-www-form-urlencoded")
+		// Do request.InsertFormData("grant_type","client_credentials")
+		 do request.EntityBody.Write("grant_type=client_credentials")
+		
+		     set request.SSLConfiguration = "testwafik"
+		
+		
+             set status=request.Post("https://www.rec2.docapost.io/hub/v2/oauth/token/")
+             $$$LOGINFO("status"_status)
+        
+             set jsonData = {}.%FromJSON(request.HttpResponse.Data)   
+           
+             	$$$LOGINFO("jsonData"_jsonData)	
+             Set Token = jsonData.%ToJSON()
+			 
+			 $$$LOGINFO(Token)
+			 
+			 
+			 
+			    set iter = jsonData.%GetIterator()
+	  /* while iter.%GetNext(.key , .value ) {
+	   
+	   	 $$$LOGINFO(value)
+	   
+	   }*/
+	   set x  = iter.%GetNext(.key , .value ) 
+	    $$$LOGINFO(value)
+			 
+			 
+			/* set xx =  {}.%FromJSON(Token) 
+             
+			 set coding2= xx.access_token
+    
+            $$$LOGINFO("Token"_coding2)*/
+    
+           	
+             
+             
+             
+              
+             
+	
+	
+	  Quit:$$$ISERR(status)
+       } Catch ex {
+                    Set status= ex.AsStatus()
+       }
+         Quit 1
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+
+
+
+
+Class User.testwafik Extends Ens.BusinessService
+{
+]]></Content>
+</UDLText>
+
+<Parameter name="ADAPTER">
+<Default>Ens.InboundAdapter</Default>
+</Parameter>
+
+<Parameter name="SETTINGS">
+<Default>TargetConfigNames,Query</Default>
+</Parameter>
+
+<Property name="TargetConfigNames">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Method name="OnProcessInput">
+<FormalSpec>pInput:%RegisteredObject,*pOutput:%RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	try{
+		
+		   $$$LOGINFO("hello")
+		   
+		     set request=##class(%Net.HttpRequest).%New()
+		     do request.SetHeader("Authorization","Basic ZTU1ODAyNzVmNzcyNDY2YTg5NDkyNWJlNDc3YzM5NjY6TWpnMllXTXlZemt0WWpaa1pTMDBZVGhoTFdFeU1EQXRPVEpqWm1Vd1kyTXdaR0kw")
+			do request.SetHeader("Content-Type","application/x-www-form-urlencoded")
+		// Do request.InsertFormData("grant_type","client_credentials")
+		 do request.EntityBody.Write("grant_type=client_credentials")
+		
+		     set request.SSLConfiguration = "testwafik"
+		
+		
+             set status=request.Post("https://www.rec2.docapost.io/hub/v2/oauth/token/")
+             $$$LOGINFO("status"_status)
+        
+             set jsonData = {}.%FromJSON(request.HttpResponse.Data)   
+           
+             	$$$LOGINFO("jsonData"_jsonData)	
+             Set Token = jsonData.%ToJSON()
+			 
+			 $$$LOGINFO(Token)
+			 
+			 
+			 
+			    set iter = jsonData.%GetIterator()
+	  /* while iter.%GetNext(.key , .value ) {
+	   
+	   	 $$$LOGINFO(value)
+	   
+	   }*/
+	   set x  = iter.%GetNext(.key , .value ) 
+	    $$$LOGINFO(value)
+			 
+			 
+			/* set xx =  {}.%FromJSON(Token) 
+             
+			 set coding2= xx.access_token
+    
+            $$$LOGINFO("Token"_coding2)*/
+    
+           	
+             
+             
+             
+              
+             
+	
+	
+	  Quit:$$$ISERR(status)
+       } Catch ex {
+                    Set status= ex.AsStatus()
+       }
+         Quit 1
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+}
+]]></Content>
+</UDLText>
+</Class>
+</Export>

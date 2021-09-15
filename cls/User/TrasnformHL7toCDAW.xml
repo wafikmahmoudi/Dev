@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="User.TrasnformHL7toCDAW">
+<Super>Ens.BusinessProcess</Super>
+
+<Parameter name="SETTINGS">
+<Default><![CDATA[TargetConfigName:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId},TransformFile:Basic]]></Default>
+</Parameter>
+
+<Method name="OnRequest">
+<FormalSpec>pRequest:EnsLib.HL7.Message,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  $$$LOGINFO("Hello")
+  set tSC = $$$OK
+ Try {
+         // Convert the HL7 message to SDA3
+         Set tSC = ##class(HS.Gateway.HL7.HL7ToSDA3).GetSDA(pRequest,.tSDA3Stream)
+         Quit:$$$ISERR(tSC)
+ 
+         // Transform the SDA3 to a C-CDA
+         Set tTransformer = ##class(HS.Util.XSLTTransformer).%New()
+         Set t= tTransformer.Transform(tSDA3Stream,"SDA3/SDA-to-CCDA-CCD.xsl",.tCDAStream)
+         $$$LOGINFO(t)
+         $$$LOGINFO("response"_tCDAStream)
+       set tSC = ..SendRequestSync("HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process",##class(Ens.StreamContainer).%New(tCDAStream),.pResponse)
+
+       } Catch ex {
+                    Set tSC= ex.AsStatus()
+                   }
+         Quit 1
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+
+
+
+Class User.TrasnformHL7toCDAW Extends Ens.BusinessProcess
+{
+]]></Content>
+</UDLText>
+
+<Parameter name="SETTINGS">
+<Default><![CDATA[TargetConfigName:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId},TransformFile:Basic]]></Default>
+</Parameter>
+
+<Method name="OnRequest">
+<FormalSpec>pRequest:EnsLib.HL7.Message,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  $$$LOGINFO("Hello")
+  set tSC = $$$OK
+ Try {
+         // Convert the HL7 message to SDA3
+         Set tSC = ##class(HS.Gateway.HL7.HL7ToSDA3).GetSDA(pRequest,.tSDA3Stream)
+         Quit:$$$ISERR(tSC)
+ 
+         // Transform the SDA3 to a C-CDA
+         Set tTransformer = ##class(HS.Util.XSLTTransformer).%New()
+         Set t= tTransformer.Transform(tSDA3Stream,"SDA3/SDA-to-CCDA-CCD.xsl",.tCDAStream)
+         $$$LOGINFO(t)
+         $$$LOGINFO("response"_tCDAStream)
+       set tSC = ..SendRequestSync("HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process",##class(Ens.StreamContainer).%New(tCDAStream),.pResponse)
+
+       } Catch ex {
+                    Set tSC= ex.AsStatus()
+                   }
+         Quit 1
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+}
+]]></Content>
+</UDLText>
+</Class>
+</Export>

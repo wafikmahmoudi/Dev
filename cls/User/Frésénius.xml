@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="User.Frésénius">
+<Super>Ens.BusinessService,%Persistent</Super>
+
+<Parameter name="ADAPTER">
+<Default>Ens.InboundAdapter</Default>
+</Parameter>
+
+<Method name="OnProcessInput">
+<FormalSpec>pInput:EnsLib.SQL.Snapshot,*pOutput:%RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+			$$$LOGINFO("BDD DATA... ")
+
+			&sql(CREATE TRIGGER TrigTestDummy AFTER INSERT ON SQLUser.testtable 
+			LANGUAGE OBJECTSCRIPT { 
+			
+		  			SET myquery ="select * from  testtable"
+		  			set statement=##class(%SQL.Statement).%New()
+		  			set status=statement.%Prepare(myquery)
+		  			set rset=statement.%Execute()
+		  			set pr=##class(User.testtableequest).%New()
+		  			 While rset.%Next()
+		  			  {
+		  			  $$$LOGINFO("lollllllllllllll ")
+		  			  set noms=rset.%Get("nom")
+		  			  $$$LOGINFO(noms)
+		  			   }
+		  			   }
+					  )
+				
+	QUIT 1
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+
+
+
+Class User.Frésénius Extends (Ens.BusinessService, %Persistent)
+{
+]]></Content>
+</UDLText>
+
+<Parameter name="ADAPTER">
+<Default>Ens.InboundAdapter</Default>
+</Parameter>
+
+<Method name="OnProcessInput">
+<FormalSpec>pInput:EnsLib.SQL.Snapshot,*pOutput:%RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+			$$$LOGINFO("BDD DATA... ")
+
+			&sql(CREATE TRIGGER TrigTestDummy AFTER INSERT ON SQLUser.testtable 
+			LANGUAGE OBJECTSCRIPT { 
+			
+		  			SET myquery ="select * from  testtable"
+		  			set statement=##class(%SQL.Statement).%New()
+		  			set status=statement.%Prepare(myquery)
+		  			set rset=statement.%Execute()
+		  			set pr=##class(User.testtableequest).%New()
+		  			 While rset.%Next()
+		  			  {
+		  			  $$$LOGINFO("lollllllllllllll ")
+		  			  set noms=rset.%Get("nom")
+		  			  $$$LOGINFO(noms)
+		  			   }
+		  			   }
+					  )
+				
+	QUIT 1
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+}
+]]></Content>
+</UDLText>
+</Class>
+</Export>

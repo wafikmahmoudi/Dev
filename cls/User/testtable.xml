@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="User.testtable">
+<Super>%Persistent</Super>
+
+<Property name="nom">
+<Type>%Library.String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN" value="256"/>
+</Property>
+
+<Property name="prenom">
+<Type>%Library.String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN" value="256"/>
+</Property>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+Class User.testtable Extends %Persistent
+{
+]]></Content>
+</UDLText>
+
+<Property name="nom">
+<Type>%Library.String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN" value="256"/>
+</Property>
+
+<Property name="prenom">
+<Type>%Library.String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN" value="256"/>
+</Property>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+}
+]]></Content>
+</UDLText>
+</Class>
+</Export>

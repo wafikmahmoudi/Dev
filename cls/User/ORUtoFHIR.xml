@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="User.ORUtoFHIR">
+<Super>Ens.BusinessProcess</Super>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>TargetConfigName</Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>Ens.DataType.ConfigName</Type>
+<InitialExpression>"HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process"</InitialExpression>
+</Property>
+
+<Method name="OnRequest">
+<FormalSpec>pRequest:Ens.StreamContainer,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	 $$$LOGINFO("wafikkkkkk")
+
+	try {
+		set tSDA3Object = pRequest
+ 	 $$$LOGINFO("test "_tSDA3Object)
+     Set tQuickStream = ##class(HS.SDA3.QuickStream).%New()
+     $$$ThrowOnError(tSDA3Object.XMLExportToStream(.tQuickStream))
+     $$$LOGINFO("tQuickStream"_tQuickStream.Read())
+      set xx = ##class(Ens.StreamContainer).%New()
+      set xx.Stream = tQuickStream.Read()
+    
+       set trasf = ..SendRequestSync(..TargetConfigName,##class(Ens.StreamContainer).%New(xx),.pResponse)
+       
+        
+   } catch ex {
+		set trasf = ex.AsStatus()
+	}
+	quit trasf
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+
+
+
+Class User.ORUtoFHIR Extends Ens.BusinessProcess
+{
+]]></Content>
+</UDLText>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>TargetConfigName</Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>Ens.DataType.ConfigName</Type>
+<InitialExpression>"HS.FHIR.DTL.Util.HC.SDA3.FHIR.Process"</InitialExpression>
+</Property>
+
+<Method name="OnRequest">
+<FormalSpec>pRequest:Ens.StreamContainer,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	 $$$LOGINFO("wafikkkkkk")
+
+	try {
+		set tSDA3Object = pRequest
+ 	 $$$LOGINFO("test "_tSDA3Object)
+     Set tQuickStream = ##class(HS.SDA3.QuickStream).%New()
+     $$$ThrowOnError(tSDA3Object.XMLExportToStream(.tQuickStream))
+     $$$LOGINFO("tQuickStream"_tQuickStream.Read())
+      set xx = ##class(Ens.StreamContainer).%New()
+      set xx.Stream = tQuickStream.Read()
+    
+       set trasf = ..SendRequestSync(..TargetConfigName,##class(Ens.StreamContainer).%New(xx),.pResponse)
+       
+        
+   } catch ex {
+		set trasf = ex.AsStatus()
+	}
+	quit trasf
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+
+}
+]]></Content>
+</UDLText>
+</Class>
+</Export>

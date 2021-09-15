@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="FHIRDemo.Service.POSTService">
+<Super>EnsLib.HL7.Service.Standard</Super>
+
+<Parameter name="CONTENTTYPE">
+<Default>text/xml</Default>
+</Parameter>
+
+<Parameter name="ADAPTER">
+<Default>EnsLib.HTTP.InboundAdapter</Default>
+</Parameter>
+
+<Property name="TargetConfigNames">
+<Type>%String</Type>
+<InitialExpression>"HL7toSDAProcess"</InitialExpression>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Parameter name="SETTINGS">
+<Default><![CDATA[TargetConfigNames:Basic:selector?multiSelect=1&context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId}]]></Default>
+</Parameter>
+
+<Method name="OnProcessInput">
+<FormalSpec>pDocIn:%RegisteredObject,*pDocOut:%RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    set status = $$$OK
+    set request = pDocIn
+
+    set request.DocType=..resolveDocType(pDocIn)
+    
+    try {
+        //$$$ThrowOnError(..SendRequestSync(..#TARGET, request, .pDocOut))
+        for iTarget=1:1:$L(..TargetConfigNames, ",") {
+		    set tOneTarget=$ZStrip($P(..TargetConfigNames,",",iTarget),"<>W")  Continue:""=tOneTarget
+		    set tSC1=..SendRequestSync(tOneTarget,request,.pDocOut)  Set:$$$ISERR(tSC1) tSC=$$$ADDSC(tSC,tSC1)
+	    }
+    } catch ex {
+        set status = ex.AsStatus()
+    }
+    Quit status
+]]></Implementation>
+</Method>
+
+<Method name="OnGetConnections">
+<Description>
+Return an array of connections for drawing lines on the config diagram</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pArray:%String,pItem:Ens.Config.Item</FormalSpec>
+<Implementation><![CDATA[
+	Do ##super(.pArray,pItem)
+	If pItem.GetModifiedSetting("TargetConfigNames",.tValue) {
+		For i=1:1:$L(tValue,",") { Set tOne=$ZStrip($P(tValue,",",i),"<>W")  Continue:""=tOne  Set pArray(tOne)="" }
+	}
+]]></Implementation>
+</Method>
+</Class>
+</Export>

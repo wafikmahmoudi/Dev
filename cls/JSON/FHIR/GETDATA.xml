@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="JSON.FHIR.GETDATA">
+<Super>Ens.BusinessProcess,%JSON.Adaptor</Super>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>TargetConfigName</Default>
+</Parameter>
+
+<Property name="TargetConfigName">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Method name="OnRequest">
+<FormalSpec>pRequest:Ens.StreamContainer,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Try {
+	// Get json content from the stream Container
+	set tSC=1
+	
+	Set jsonData=pRequest.StreamGet()
+	set stream=##class(%DynamicObject).%FromJSON(jsonData)
+	$$$LOGINFO("Step 1 done !")
+	Quit:$$$ISERR(tSC)
+	
+	//Read the content of 
+ 	set text = ""
+         do jsonData.Rewind()
+         while 'jsonData.AtEnd { 
+         set text = jsonData.Read()
+        }
+        $$$LOGINFO("JSON from request  op1: "_stream.%ToJSON())
+        $$$LOGINFO("JSON from request op 2: "_text)
+ 
+	
+	
+	
+	
+	//set tSC=..SendRequestAsync("HS.FHIR.DTL.Util.HC.SDA3.FHIR.ProcessForSUI",tRequest2,.pResponse)
+	$$$LOGINFO("Getting JSON data is done !")
+	Quit:$$$ISERR(tSC)
+	} Catch ex {
+	Set tSC= ex.AsStatus()
+	}
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>GETDATADefaultData</DefaultData>
+<Data name="GETDATADefaultData">
+<Subscript>"GETDATA"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>
